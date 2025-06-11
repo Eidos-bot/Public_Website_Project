@@ -14,6 +14,7 @@
             margin: 0;
             padding: 0;
         }
+
         header {
             background-color: #630e0e;
             color: #ffffff;
@@ -23,11 +24,14 @@
             position: fixed;
             width: 100%;
             border:1px solid #000000
+
         }
+
         h1 {
             color:#ffffff;
             font-size: 12px
         }
+
         .nonGLRelatedSection{
             max-width: 100%;
             height: 700px;
@@ -176,6 +180,7 @@
                 <div class="projectIdClass" id="projIdClassId">
 
 <!--                    I wanted to make it so the button was row aligned to the right of the project id input. But bottom right.-->
+
                     <div class='child gl-child'><label>Amount<input id="amt" name="Amount" step="0.01" type="number" required/></label></div>
                     <div class='child gl-child' id="removeGlClass"><button id="removeGroup" type="button">-</button></div>
 
@@ -183,10 +188,10 @@
 
                 </div>
 
-
             </div>
 
         </div>
+
         <div class="nonGLRelatedSection">
 
 
@@ -227,39 +232,50 @@
 
             <div class="submitter_objs">
 
-                <div class="child sub"><label>First Name<input id="first_name" name="First Name" type="text" required/></label><button type="submit" id="submit_button" >Upload</button></div>
-                <div class="child sub"><label>Last Name<input id="last_name" name="Last Name" type="text" required/></label></div>
+                <div class="child sub"><label>Submitter<input id="submitter" name="Submitter" type="text" required/></label><button type="submit" id="submit_button" >Upload</button></div>
+
 <!--                Remember to add approver section and align it probably-->
 
 
                 <br /><br />
 
-                <div class="child sub"><label>Department<select id="dept" name="Department" required>
-                    <option disabled selected value> -- Select Department -- </option>
-                    <option value="ACADEMIC & STUDENT SUCCESS">ACADEMIC & STUDENT SUCCESS</option>
-                    <option value="ADMISSIONS">ADMISSIONS</option>
-                    <option value="DEVELOPMENT">DEVELOPMENT</option>
-                    <option value="EXTERNAL AFFAIRS">EXTERNAL AFFAIRS</option>
-                    <option value="EVENTS">EVENTS</option>
-                    <option value="CAREER CENTER">CAREER CENTER</option>
-                    <option value="CLINICS">CLINICS</option>
-                    <option value="DEANS' OFFICE">DEANS' OFFICE</option>
-                    <option value="FACILITIES">FACILITIES</option>
-                    <option value="FACULTY">FACULTY</option>
-                    <option value="FINANCE">FINANCE</option>
-                    <option value="FINANCIAL AID">FINANCIAL AID</option>
-                    <option value="GENERAL COUNSEL">GENERAL COUNSEL</option>
-                    <option value="HUMAN RESOURCES">HUMAN RESOURCES</option>
-                    <option value="INFORMATION TECHNOLOGY">INFORMATION TECHNOLOGY</option>
-                    <option value="INTERNATIONAL PROGRAMS">INTERNATIONAL PROGRAMS</option>
-                    <option value="LEGAL WRITING FACULTY">LEGAL WRITING FACULTY</option>
-                    <option value="LIBRARY">LIBRARY</option>
-                    <option value="PUBLIC SERVICE">PUBLIC SERVICE</option>
-                    <option value="REGISTRAR">REGISTRAR</option>
-                    <option value="STUDENT AFFAIRS">STUDENT AFFAIRS</option>
-                    <option value="SBA">SBA</option>
+                <div class="child sub">
 
-                </select></label></div>
+                    <label> Department
+
+                        <select id="dept" name="Department" required>
+
+                        <option disabled selected value> -- Select Department -- </option>
+
+                        <option value="ACADEMIC & STUDENT SUCCESS">ACADEMIC & STUDENT SUCCESS</option>
+                        <option value="ADMISSIONS">ADMISSIONS</option>
+                        <option value="DEVELOPMENT">DEVELOPMENT</option>
+                        <option value="EXTERNAL AFFAIRS">EXTERNAL AFFAIRS</option>
+                        <option value="EVENTS">EVENTS</option>
+                        <option value="CAREER CENTER">CAREER CENTER</option>
+                        <option value="CLINICS">CLINICS</option>
+                        <option value="DEANS' OFFICE">DEANS' OFFICE</option>
+                        <option value="FACILITIES">FACILITIES</option>
+                        <option value="FACULTY">FACULTY</option>
+                        <option value="FINANCE">FINANCE</option>
+                        <option value="FINANCIAL AID">FINANCIAL AID</option>
+                        <option value="GENERAL COUNSEL">GENERAL COUNSEL</option>
+                        <option value="HUMAN RESOURCES">HUMAN RESOURCES</option>
+                        <option value="INFORMATION TECHNOLOGY">INFORMATION TECHNOLOGY</option>
+                        <option value="INTERNATIONAL PROGRAMS">INTERNATIONAL PROGRAMS</option>
+                        <option value="LEGAL WRITING FACULTY">LEGAL WRITING FACULTY</option>
+                        <option value="LIBRARY">LIBRARY</option>
+                        <option value="PUBLIC SERVICE">PUBLIC SERVICE</option>
+                        <option value="REGISTRAR">REGISTRAR</option>
+                        <option value="STUDENT AFFAIRS">STUDENT AFFAIRS</option>
+                        <option value="SBA">SBA</option>
+
+                        </select>
+
+                    </label>
+
+                </div>
+
             </div>
 
             <!--Keeping the button away.-->

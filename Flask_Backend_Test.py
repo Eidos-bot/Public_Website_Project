@@ -52,7 +52,7 @@ def serve_form():
 @app.route('/upload', methods=['POST'])
 
 def upload_file():
-    ap_upload_test_database_connection = sqlite3.connect('identifier.sqlite')
+    ap_upload_test_database_connection = sqlite3.connect('ap_upload_test.sqlite')
     cursor = ap_upload_test_database_connection.cursor()
     cursor.execute('SELECT MAX("Accrual Tag") FROM ACCRUALS')
 

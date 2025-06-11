@@ -118,13 +118,13 @@ def upload_file():
         # accrual_entry_df.to_csv(save_path1)
         # This is where further action on the files would take place. Y
 
-        uploaded_file.save(save_path1)
+        ##uploaded_file.save(save_path1)
         # You need to seek again if saving to multiple locations. After first save, data will be zero for subsequent ones.
-        uploaded_file.seek(0)
+        ##uploaded_file.seek(0)
         # Seek everytime you 'touch' the binary data. Using read as a check wasn't helping because it did the reset
         # after the save.
         try:
-            uploaded_file.save(save_path2)
+            ##uploaded_file.save(save_path2)
             # accrual_entry_df.to_csv(f"{UPLOAD_WORKFOLDER}\\accrual_entry_df.csv",mode='a', header=False, index=False)
             # accrual_entry_df.to_csv(f"{local_folder}\\accrual_entry_df.csv",mode='a', header=True, index=False)
             accrual_entry_df.to_sql("ACCRUALS", ap_upload_test_database_connection, if_exists="append", index=False)

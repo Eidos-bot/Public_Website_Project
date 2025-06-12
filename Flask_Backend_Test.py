@@ -97,7 +97,7 @@ def serve_form():
 
 # make sure to have '/upload' in the action link. Without it, you get a 405 error from post requests.
 @app.route('/upload', methods=['POST'])
-
+@login_required
 def upload_file():
     ap_upload_test_database_connection = sqlite3.connect('ap_upload_test.sqlite')
     cursor = ap_upload_test_database_connection.cursor()

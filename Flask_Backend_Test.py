@@ -50,7 +50,7 @@ def login():
         </form>
     '''
 # ip_filter = IPFilter(app, ruleset=Whitelist())
-# ip_filter.ruleset.permit(["2600:4808:3954:c901::/64","24.47.4.0/24"])
+# ip_filter.ruleset.permit()
 
 
 #Was my attempt to see ips so i could whitelist. Pointless with basic auth

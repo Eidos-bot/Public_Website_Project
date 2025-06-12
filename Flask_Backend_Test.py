@@ -1,25 +1,67 @@
-from flask import Flask,request, render_template
+from flask import Flask,request, render_template, redirect, url_for
 import sqlite3
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 from pandas import DataFrame
+from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')
-#Was my attempt to see ips so i could whitelist. Pointless with basic auth
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
+app.secret_key = "EIDOS"
+
 # UPLOAD_FOLDER = r"Z:\Test Files"
 # UPLOAD_WORKFOLDER =  r"T:\Accounts Payable\AP WORKING FOLDER\AP Invoices\11 MAY 2025\05-06-2025\Chris\Test Network"
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
+users = {
+    "ChrisAdmin": {"password": "temppass"},
+}
+
+class User(UserMixin):
+    def __init__(self, username):
+        self.id = username
+
+@login_manager.user_loader
+def load_user(user_id):
+    if user_id in users:
+        return User(user_id)
+    return None
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username in users and users[username]['password'] == password:
+            user = User(username)
+            login_user(user)
+            return redirect(url_for('serve_form'))
+        return "Invalid credentials", 401
+    return '''
+        <form method="post">
+            Username: <input type="text" name="username" /><br>
+            Password: <input type="password" name="password" /><br>
+            <input type="submit" value="Login" />
+        </form>
+    '''
 # ip_filter = IPFilter(app, ruleset=Whitelist())
 # ip_filter.ruleset.permit(["2600:4808:3954:c901::/64","24.47.4.0/24"])
 
 
+#Was my attempt to see ips so i could whitelist. Pointless with basic auth
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1)
 
 UPLOAD_FOLDER = r"\\ChrisD-Main\Test Network\Test Files"
 UPLOAD_WORKFOLDER =r"\\finance\Treasurer\Accounts Payable\AP WORKING FOLDER\AP Invoices\11 MAY 2025\05-06-2025\Chris\finance Test Network"
 local_folder = r"C:\Test Network\Test Files"
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect('/login')
 
 allowed_extensions= {'pdf'}
 
@@ -39,8 +81,13 @@ def allowed_file(filename):
 #         abort(404)
 
 
+# @app.route('/')
+# def serve_home():
+#     return render_template('sign_in.html')
 @app.route('/')
+@login_required
 def serve_form():
+
     return render_template('ap_upload_test.html')
 
 # @app.route('/favicon.ico')

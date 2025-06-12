@@ -5,9 +5,11 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 from pandas import DataFrame
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
+from dotenv import load_dotenv
 
+load_dotenv()
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')
-app.secret_key = "EIDOS"
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev')
 
 # UPLOAD_FOLDER = r"Z:\Test Files"
 # UPLOAD_WORKFOLDER =  r"T:\Accounts Payable\AP WORKING FOLDER\AP Invoices\11 MAY 2025\05-06-2025\Chris\Test Network"

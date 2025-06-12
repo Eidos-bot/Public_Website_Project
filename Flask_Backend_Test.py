@@ -42,13 +42,7 @@ def login():
             login_user(user)
             return redirect(url_for('serve_form'))
         return "Invalid credentials", 401
-    return '''
-        <form method="post">
-            Username: <input type="text" name="username" /><br>
-            Password: <input type="password" name="password" /><br>
-            <input type="submit" value="Login" />
-        </form>
-    '''
+    return render_template('Homescreen.html')
 # ip_filter = IPFilter(app, ruleset=Whitelist())
 # ip_filter.ruleset.permit()
 

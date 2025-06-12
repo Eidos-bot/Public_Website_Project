@@ -13,7 +13,6 @@ services:
     dockerCommand: gunicorn Flask_Backend_Test:app
     region: ohio
     healthCheckPath: "/"
-
     envVars:
       - key: PORT
         value: "10000"

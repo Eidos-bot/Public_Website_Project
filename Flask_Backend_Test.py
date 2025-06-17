@@ -6,6 +6,7 @@ import os
 from pandas import DataFrame
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 from dotenv import load_dotenv
+import hashlib
 
 load_dotenv()
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')
@@ -20,6 +21,10 @@ login_manager.login_view = 'login'
 users = {
     "ChrisAdmin": {"password": "temppass"},
 }
+
+def detail_hasher(to_be_hashed):
+    hashed_obj = hashlib.sha3_512(to_be_hashed.encode())
+    return hashed_obj.hexdigest()
 
 class User(UserMixin):
     def __init__(self, username):
@@ -180,8 +185,8 @@ def upload_file():
         # print(f"Vendor:{vendor} "  f"Invoice Date: {invoice_dt} " f"Amount: {amount} " f"GL Code List: {gl_codes} "
         # f"Department: {department} " f"Fixed Asset Check:{fa_check} " f"Estimate Check: {est_check} " f"Gl Code
         # Amount List: {gl_code_amounts} " f"Gl Code Amount List: {project_ids}")
-
-        return f"Success! File saved to: {save_path1} and {save_path2} with accrual id: {main_accrual_tag}."
+        return redirect(url_for('serve_form'))
+        # return f"Success! File saved to: {save_path1} and {save_path2} with accrual id: {main_accrual_tag}."
 
     return "Fail, check the name again. No file received"
 

@@ -181,7 +181,7 @@ def upload_file():
         # f"Department: {department} " f"Fixed Asset Check:{fa_check} " f"Estimate Check: {est_check} " f"Gl Code
         # Amount List: {gl_code_amounts} " f"Gl Code Amount List: {project_ids}")
 
-        return f"Success! File saved to: {save_path1} and {save_path2}"
+        return f"Success! File saved to: {save_path1} and {save_path2} with accrual id: {main_accrual_tag}."
 
     return "Fail, check the name again. No file received"
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Login</title>
+    <title>Account Creation</title>
     <style>
         body {
             font-family: 'Georgia', serif;
@@ -29,37 +29,23 @@
             color:#ffffff;
             font-size: 12px
         }
-form {
-    {#justify-content:center;#}
-    margin: 100px auto;
-    display: flex;
-    flex-direction: column;
-    border-radius: 18px;
-    background-color: #630e0e;
-    padding: 40px;
-    width: 400px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    color: white;
-}
-        </style>
+    </style>
 </head>
 <body>
-
-    <header>
+ <header>
 
         Brooklyn Law School - AP Testing
 
     <h1>Coding since 2020</h1>
 
-
-
-
     </header>
     <br/><br/>
-
     <form method="post">
-        <a href="{{ url_for('login_microsoft') }}">Log in with Microsoft</a>
+
+        <label>Username: <input id="username" type="text" name="username" /></label><br>
+        <label>Password: <input id="password" type="password" name="password" /></label><br>
     </form>
 </body>
+
 
 </html>

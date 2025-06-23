@@ -1,4 +1,4 @@
-from flask import Flask,request, render_template, redirect, url_for
+from flask import Flask,request, render_template, redirect, url_for, session
 import sqlite3
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -6,11 +6,13 @@ import os
 from pandas import DataFrame
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 from dotenv import load_dotenv
-import hashlib
+from requests_oauthlib import OAuth2Session
+
+from Password_Creation_Simple_Test import create_password
 
 load_dotenv()
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 # UPLOAD_FOLDER = r"Z:\Test Files"
 # UPLOAD_WORKFOLDER =  r"T:\Accounts Payable\AP WORKING FOLDER\AP Invoices\11 MAY 2025\05-06-2025\Chris\Test Network"
@@ -22,9 +24,6 @@ users = {
     "ChrisAdmin": {"password": "temppass"},
 }
 
-def detail_hasher(to_be_hashed):
-    hashed_obj = hashlib.sha3_512(to_be_hashed.encode())
-    return hashed_obj.hexdigest()
 
 class User(UserMixin):
     def __init__(self, username):
@@ -33,8 +32,15 @@ class User(UserMixin):
 @login_manager.user_loader
 def load_user(user_id):
     if user_id in users:
+
         return User(user_id)
+
     return None
+
+@app.route('/account_creation', methods=['GET', 'POST'])
+def serve_ac_form():
+    return render_template('account_creation_page.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -44,6 +50,7 @@ def login():
         password = request.form.get('password')
         if username in users and users[username]['password'] == password:
             user = User(username)
+            print(user)
             login_user(user)
             return redirect(url_for('serve_form'))
         return "Invalid credentials", 401
@@ -59,9 +66,53 @@ UPLOAD_FOLDER = r"\\ChrisD-Main\Test Network\Test Files"
 UPLOAD_WORKFOLDER =r"\\finance\Treasurer\Accounts Payable\AP WORKING FOLDER\AP Invoices\11 MAY 2025\05-06-2025\Chris\finance Test Network"
 local_folder = r"C:\Test Network\Test Files"
 
+AUTH_BASE_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+TOKEN_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
+USER_INFO_URL = 'https://graph.microsoft.com/v1.0/me'
+OAUTH_SCOPE = ['User.Read']
+
+@app.route('/login/microsoft')
+def login_microsoft():
+    oauth = OAuth2Session(
+        os.getenv("CLIENT_ID"),
+        scope=OAUTH_SCOPE,
+        redirect_uri=os.getenv("REDIRECT_URI")
+    )
+    auth_url, state = oauth.authorization_url(AUTH_BASE_URL)
+    session['oauth_state'] = state
+    return redirect(auth_url)
+
+@app.route('/auth/callback')
+def auth_callback():
+    oauth = OAuth2Session(
+        os.getenv("CLIENT_ID"),
+        redirect_uri=os.getenv("REDIRECT_URI"),
+        state=session.get('oauth_state')
+    )
+    print(oauth.state)
+    token = oauth.fetch_token(
+        TOKEN_URL,
+        client_secret=os.getenv("CLIENT_SECRET"),
+        authorization_response=request.url
+    )
+
+    user_info = oauth.get(USER_INFO_URL).json()
+    email = user_info.get("mail") or user_info.get("userPrincipalName")
+
+    if not email:
+        return "Unable to retrieve email address.", 400
+
+    if email not in users:
+        users[email] = {'password': None}
+
+    user = User(email)
+    login_user(user)
+    return redirect(url_for('serve_form'))
+
 @app.route('/logout')
 def logout():
     logout_user()
+    session.clear()
     return redirect('/login')
 
 allowed_extensions= {'pdf'}
@@ -85,11 +136,16 @@ def allowed_file(filename):
 # @app.route('/')
 # def serve_home():
 #     return render_template('sign_in.html')
-@app.route('/')
+@app.route('/main')
 @login_required
 def serve_form():
-
     return render_template('ap_upload_test.html')
+
+# @app.route('/')
+# @login_required
+# def serve_main():
+#
+#     return
 
 # @app.route('/favicon.ico')
 # def favicon():
@@ -116,6 +172,7 @@ def upload_file():
     accrual_tag3 = "{:05d}".format(accrual_tag2)
     main_accrual_tag = accrual_tag1 + accrual_tag3
     uploaded_file = request.files.get('file')
+    print(current_user.id)
 
     raw_gl_codes = request.form.getlist('GL')
     gl_codes = [gl_transmuter(x) for x in raw_gl_codes]
@@ -135,7 +192,7 @@ def upload_file():
     est_check_log = request.form.get('Estimate Check')
 
     print(f"Fixed asset: {fa_check_log}. Estimate: {est_check_log}")
-    submitter = request.form.get('Submitter')
+    submitter = current_user.id
 
 
         # uploaded_file.save(os.path.join(UPLOAD_FOLDER, uploaded_file.filename))

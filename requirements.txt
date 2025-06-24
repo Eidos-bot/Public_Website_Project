@@ -22,3 +22,4 @@ python-dotenv~=1.1.0
 requests-oauthlib~=2.0.0
 psycopg2-binary~=2.9.10
 azure-storage-blob
+openpyxl

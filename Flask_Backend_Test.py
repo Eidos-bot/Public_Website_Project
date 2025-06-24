@@ -20,7 +20,7 @@ DATABASE_URL = (
     "?sslmode=require"
 )
 
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=True)
 
 load_dotenv()
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')

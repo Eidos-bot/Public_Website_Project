@@ -9,6 +9,15 @@ from dotenv import load_dotenv
 from requests_oauthlib import OAuth2Session
 
 from Password_Creation_Simple_Test import create_password
+from sqlalchemy import create_engine, text
+
+DATABASE_URL = (
+    "postgresql://eidos:L0SrVaedulB9tnFzkUoc2twhIbWVAGz9@"
+    "dpg-d1d0idfdiees73cbhvh0-a.ohio-postgres.render.com:5432/accrual_db"
+    "?sslmode=require"
+)
+
+engine = create_engine(DATABASE_URL, echo=True)
 
 load_dotenv()
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')
@@ -171,97 +180,97 @@ def serve_main():
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload_file():
-    ap_upload_test_database_connection = sqlite3.connect('ap_upload_test.sqlite')
-    cursor = ap_upload_test_database_connection.cursor()
-    cursor.execute('SELECT MAX("Accrual Tag") FROM ACCRUALS')
+    with engine.connect() as result:
 
-    max_tag = cursor.fetchone()[0]
+        conn = result.execute(text('SELECT MAX("Accrual Tag") FROM "ACCRUALS"'))
 
-    if max_tag is None:
-       accrual_tag2 = 1
-    else:
-        current_num = int(max_tag.replace("ACC", ""))
-        accrual_tag2 = current_num + 1
-    accrual_tag1 = "ACC"
+        max_tag = conn.scalar()
 
-    accrual_tag3 = "{:05d}".format(accrual_tag2)
-    main_accrual_tag = accrual_tag1 + accrual_tag3
-    uploaded_file = request.files.get('file')
-    print(current_user.id)
+        if max_tag is None:
+           accrual_tag2 = 1
+        else:
+            current_num = int(max_tag.replace("ACC", ""))
+            accrual_tag2 = current_num + 1
+        accrual_tag1 = "ACC"
 
-    raw_gl_codes = request.form.getlist('GL')
-    gl_codes = [gl_transmuter(x) for x in raw_gl_codes]
-    gl_code_amounts = request.form.getlist('Amount')
-    project_ids = request.form.getlist('Project ID')
-    liabilities = ["4-6-0605-2000" if x.startswith("4") else "1-6-0610-2000" for x in gl_codes]
+        accrual_tag3 = "{:05d}".format(accrual_tag2)
+        main_accrual_tag = accrual_tag1 + accrual_tag3
+        uploaded_file = request.files.get('file')
+        print(current_user.id)
 
-    vendor = request.form.get('Vendor')
-    invoice_dt = request.form.get('Invoice Date')
-    amount = request.form.get('Gl Amount Total')
-    department = request.form.get('Department')
-    description = request.form.get('Description')
-    invoice_num = request.form.get('Invoice Number')
-    est_check = "Estimate" if request.form.get('Estimate Check') == "on" else "Actual"
-    fa_check = "Fixed Asset" if request.form.get('Asset Check') == "on" else "Not Asset"
-    fa_check_log = request.form.get('Asset Check')
-    est_check_log = request.form.get('Estimate Check')
+        raw_gl_codes = request.form.getlist('GL')
+        gl_codes = [gl_transmuter(x) for x in raw_gl_codes]
+        gl_code_amounts = request.form.getlist('Amount')
+        project_ids = request.form.getlist('Project ID')
+        liabilities = ["4-6-0605-2000" if x.startswith("4") else "1-6-0610-2000" for x in gl_codes]
 
-    print(f"Fixed asset: {fa_check_log}. Estimate: {est_check_log}")
-    submitter = request.form.get('Submitter')
+        vendor = request.form.get('Vendor')
+        invoice_dt = request.form.get('Invoice Date')
+        amount = request.form.get('Gl Amount Total')
+        department = request.form.get('Department')
+        description = request.form.get('Description')
+        invoice_num = request.form.get('Invoice Number')
+        est_check = "Estimate" if request.form.get('Estimate Check') == "on" else "Actual"
+        fa_check = "Fixed Asset" if request.form.get('Asset Check') == "on" else "Not Asset"
+        fa_check_log = request.form.get('Asset Check')
+        est_check_log = request.form.get('Estimate Check')
 
-
-        # uploaded_file.save(os.path.join(UPLOAD_FOLDER, uploaded_file.filename))
-    if uploaded_file and uploaded_file.filename and allowed_file(uploaded_file.filename):
-
-        accrual_entry_df = DataFrame({'Budget Codes': gl_codes,
-                                      'Liabilities' : liabilities,
-                               'Budget Code Amounts': gl_code_amounts,
-                               'Project IDs': project_ids})
-
-        accrual_entry_df['Vendor'] = vendor
-        accrual_entry_df['Description'] = description
-        accrual_entry_df['Invoice Date'] = invoice_dt
-        accrual_entry_df['Invoice Number'] = invoice_num
-        accrual_entry_df['Estimate'] = est_check
-        accrual_entry_df['Fixed Asset'] = fa_check
-        accrual_entry_df['Total Amount'] = amount
-        accrual_entry_df['Submitter'] = submitter
-        accrual_entry_df['Department'] = department
-        accrual_entry_df['Accrual Tag'] = main_accrual_tag
+        print(f"Fixed asset: {fa_check_log}. Estimate: {est_check_log}")
+        submitter = request.form.get('Submitter')
 
 
-        filename = secure_filename(uploaded_file.filename)
-        save_path1 = os.path.join(UPLOAD_FOLDER, filename)
-        save_path2 = os.path.join(UPLOAD_WORKFOLDER, filename)
+            # uploaded_file.save(os.path.join(UPLOAD_FOLDER, uploaded_file.filename))
+        if uploaded_file and uploaded_file.filename and allowed_file(uploaded_file.filename):
 
-        print(accrual_entry_df)
-        # accrual_entry_df.to_csv(save_path1)
-        # This is where further action on the files would take place. Y
+            accrual_entry_df = DataFrame({'Budget Codes': gl_codes,
+                                          'Liabilities' : liabilities,
+                                   'Budget Code Amounts': gl_code_amounts,
+                                   'Project IDs': project_ids})
 
-        ##uploaded_file.save(save_path1)
-        # You need to seek again if saving to multiple locations. After first save, data will be zero for subsequent ones.
-        ##uploaded_file.seek(0)
-        # Seek everytime you 'touch' the binary data. Using read as a check wasn't helping because it did the reset
-        # after the save.
-        try:
-            ##uploaded_file.save(save_path2)
-            # accrual_entry_df.to_csv(f"{UPLOAD_WORKFOLDER}\\accrual_entry_df.csv",mode='a', header=False, index=False)
-            # accrual_entry_df.to_csv(f"{local_folder}\\accrual_entry_df.csv",mode='a', header=True, index=False)
-            accrual_entry_df.to_sql("ACCRUALS", ap_upload_test_database_connection, if_exists="append", index=False)
-            accrual_tag2+=1
-        except FileNotFoundError:
-            return "Server is probably disconnected from the finance drive. Please let christopher.dessourc@brooklaw.edu know."
+            accrual_entry_df['Vendor'] = vendor
+            accrual_entry_df['Description'] = description
+            accrual_entry_df['Invoice Date'] = invoice_dt
+            accrual_entry_df['Invoice Number'] = invoice_num
+            accrual_entry_df['Estimate'] = est_check
+            accrual_entry_df['Fixed Asset'] = fa_check
+            accrual_entry_df['Total Amount'] = amount
+            accrual_entry_df['Submitter'] = submitter
+            accrual_entry_df['Department'] = department
+            accrual_entry_df['Accrual Tag'] = main_accrual_tag
 
 
+            filename = secure_filename(uploaded_file.filename)
+            save_path1 = os.path.join(UPLOAD_FOLDER, filename)
+            save_path2 = os.path.join(UPLOAD_WORKFOLDER, filename)
 
-        # print(f"Vendor:{vendor} "  f"Invoice Date: {invoice_dt} " f"Amount: {amount} " f"GL Code List: {gl_codes} "
-        # f"Department: {department} " f"Fixed Asset Check:{fa_check} " f"Estimate Check: {est_check} " f"Gl Code
-        # Amount List: {gl_code_amounts} " f"Gl Code Amount List: {project_ids}")
-        flash("Successfully submitted.")
-        return redirect(url_for('serve_form'))
-        # return f"Success! File saved to: {save_path1} and {save_path2} with accrual id: {main_accrual_tag}."
+            print(accrual_entry_df)
+            # accrual_entry_df.to_csv(save_path1)
+            # This is where further action on the files would take place. Y
 
-    return "Fail, check the name again. No file received"
+            ##uploaded_file.save(save_path1)
+            # You need to seek again if saving to multiple locations. After first save, data will be zero for subsequent ones.
+            ##uploaded_file.seek(0)
+            # Seek everytime you 'touch' the binary data. Using read as a check wasn't helping because it did the reset
+            # after the save.
+            try:
+                ##uploaded_file.save(save_path2)
+                # accrual_entry_df.to_csv(f"{UPLOAD_WORKFOLDER}\\accrual_entry_df.csv",mode='a', header=False, index=False)
+                # accrual_entry_df.to_csv(f"{local_folder}\\accrual_entry_df.csv",mode='a', header=True, index=False)
+                accrual_entry_df.to_sql("ACCRUALS", con=engine, if_exists="append", index=False)
+                accrual_tag2+=1
+            except FileNotFoundError:
+                return "Server is probably disconnected from the finance drive. Please let christopher.dessourc@brooklaw.edu know."
+
+
+
+            # print(f"Vendor:{vendor} "  f"Invoice Date: {invoice_dt} " f"Amount: {amount} " f"GL Code List: {gl_codes} "
+            # f"Department: {department} " f"Fixed Asset Check:{fa_check} " f"Estimate Check: {est_check} " f"Gl Code
+            # Amount List: {gl_code_amounts} " f"Gl Code Amount List: {project_ids}")
+            flash("Successfully submitted.")
+            return redirect(url_for('serve_form'))
+            # return f"Success! File saved to: {save_path1} and {save_path2} with accrual id: {main_accrual_tag}."
+
+        return "Fail, check the name again. No file received"
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

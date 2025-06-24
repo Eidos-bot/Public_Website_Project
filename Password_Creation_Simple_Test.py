@@ -1,5 +1,6 @@
 import hashlib
 import secrets
+import psycopg2
 
 # This is how i imagine the password creation process will go
 
@@ -40,3 +41,6 @@ if __name__ == "__main__":
                     print("Wrong password.")
             else:
                 print("Invalid username.")
+
+
+

@@ -173,8 +173,7 @@ def serve_form():
 @app.route('/')
 @login_required
 def serve_main():
-
-    return
+    return redirect(url_for('serve_form'))
 
 # @app.route('/favicon.ico')
 # def favicon():

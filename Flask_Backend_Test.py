@@ -184,6 +184,7 @@ def serve_main():
 #                           'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
 @app.route('/download-accruals')
+@login_required
 def download_excel():
     # Query your data
     df = pandas.read_sql('SELECT * FROM accruals', con=engine)

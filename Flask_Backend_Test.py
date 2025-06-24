@@ -182,7 +182,7 @@ def serve_main():
 def upload_file():
     with engine.connect() as result:
 
-        conn = result.execute(text('SELECT MAX("Accrual Tag") FROM "ACCRUALS"'))
+        conn = result.execute(text('SELECT MAX("Accrual Tag") FROM accruals'))
 
         max_tag = conn.scalar()
 
@@ -256,7 +256,7 @@ def upload_file():
                 ##uploaded_file.save(save_path2)
                 # accrual_entry_df.to_csv(f"{UPLOAD_WORKFOLDER}\\accrual_entry_df.csv",mode='a', header=False, index=False)
                 # accrual_entry_df.to_csv(f"{local_folder}\\accrual_entry_df.csv",mode='a', header=True, index=False)
-                accrual_entry_df.to_sql("ACCRUALS", con=engine, if_exists="append", index=False)
+                accrual_entry_df.to_sql("accruals", con=engine, if_exists="append", index=False)
                 accrual_tag2+=1
             except FileNotFoundError:
                 return "Server is probably disconnected from the finance drive. Please let christopher.dessourc@brooklaw.edu know."

@@ -32,6 +32,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.addEventListener("change",function(){arrayOfElements()})
     document.addEventListener("click",function(){arrayOfElements()})
 
+
     // So now i have a list of all glGroups, new and old, and if any of them evaluate as false, I get the submit button disabled.
     // It has to be said this is not easily maintained, to me, because it doesn't flow as nicely as I'm used to in python.
     // I'm not used to dynamic lists that change on runtime.

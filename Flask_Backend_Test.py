@@ -1,4 +1,5 @@
 from flask import Flask,request, render_template, redirect, url_for, session, flash
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 import sqlite3
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -261,6 +262,18 @@ def upload_file():
             except FileNotFoundError:
                 return "Server is probably disconnected from the finance drive. Please let christopher.dessourc@brooklaw.edu know."
 
+            azure_connection_string = os.getenv("AZURE_CONNECTION_STRING")
+            azure_container = "accrualblobcontainer"
+            try:
+                blob_service_client = BlobServiceClient.from_connection_string(azure_connection_string)
+                container_client = blob_service_client.get_container_client(azure_container)
+                blob_name = f"{main_accrual_tag}_{secure_filename(uploaded_file.filename)}"
+                blob_client = container_client.get_blob_client(blob_name)
+                uploaded_file.stream.seek(0)
+                blob_client.upload_blob(uploaded_file.stream, overwrite=True)
+            except Exception as e:
+                print(e)
+                pass
 
 
             # print(f"Vendor:{vendor} "  f"Invoice Date: {invoice_dt} " f"Amount: {amount} " f"GL Code List: {gl_codes} "

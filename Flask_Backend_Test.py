@@ -1,14 +1,15 @@
-from flask import Flask,request, render_template, redirect, url_for, session, flash
+from flask import Flask,request, render_template, redirect, url_for, session, flash, send_file
 from azure.storage.blob import BlobServiceClient
 import sqlite3
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 from pandas import DataFrame
+import pandas
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 from dotenv import load_dotenv
 from requests_oauthlib import OAuth2Session
-
+from io import BytesIO
 from Password_Creation_Simple_Test import create_password
 from sqlalchemy import create_engine, text
 
@@ -51,6 +52,8 @@ def load_user(user_id):
 @app.route('/account_creation', methods=['GET', 'POST'])
 def serve_ac_form():
     return render_template('account_creation_page.html')
+
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -176,6 +179,26 @@ def serve_main():
 # def favicon():
 #     return send_from_directory(os.path.join(app.root_path, 'static'),
 #                           'favicon.ico',mimetype='image/vnd.microsoft.icon')
+
+@app.route('/download-accruals')
+def download_excel():
+    # Query your data
+    df = pandas.read_sql('SELECT * FROM accruals', con=engine)
+
+    # Create in-memory Excel file
+    output = BytesIO()
+    with pandas.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Accruals')
+
+    output.seek(0)
+
+    # Serve the file
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name='accruals_export.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 # make sure to have '/upload' in the action link. Without it, you get a 405 error from post requests.
 @app.route('/upload', methods=['POST'])

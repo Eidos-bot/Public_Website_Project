@@ -1,4 +1,4 @@
-from flask import Flask,request, render_template, redirect, url_for, session
+from flask import Flask,request, render_template, redirect, url_for, session, flash
 import sqlite3
 from werkzeug.utils import secure_filename
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -26,8 +26,9 @@ users = {
 
 
 class User(UserMixin):
-    def __init__(self, username):
+    def __init__(self, username, name = None):
         self.id = username
+        self.name = name
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -48,9 +49,10 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        if username in users and users[username]['password'] == password:
+        if username in users and users[username]['password']  == password and username.endswith("@brooklaw.edu"):
+
             user = User(username)
-            print(user)
+
             login_user(user)
             return redirect(url_for('serve_form'))
         return "Invalid credentials", 401
@@ -78,7 +80,7 @@ def login_microsoft():
         scope=OAUTH_SCOPE,
         redirect_uri=os.getenv("REDIRECT_URI")
     )
-    auth_url, state = oauth.authorization_url(AUTH_BASE_URL)
+    auth_url, state = oauth.authorization_url(AUTH_BASE_URL, prompt = 'select_account')
     session['oauth_state'] = state
     return redirect(auth_url)
 
@@ -90,7 +92,9 @@ def auth_callback():
         state=session.get('oauth_state')
     )
     print(oauth.state)
-    token = oauth.fetch_token(
+
+    # Its annoying that its gray, but the value
+    oauth.fetch_token(
         TOKEN_URL,
         client_secret=os.getenv("CLIENT_SECRET"),
         authorization_response=request.url
@@ -104,15 +108,26 @@ def auth_callback():
 
     if email not in users:
         users[email] = {'password': None}
-
-    user = User(email)
+    if not email.endswith("@brooklaw.edu"):
+        flash("You must login with a brooklaw.edu email address.")
+        return redirect('/login')
+    full_name = user_info.get("displayName")
+    user = User(email, full_name)
+    session['user_name'] = full_name
     login_user(user)
+    print(email)
     return redirect(url_for('serve_form'))
 
 @app.route('/logout')
 def logout():
     logout_user()
     session.clear()
+    # microsoft_logout_url = (
+    #         "https://login.microsoftonline.com/common/oauth2/v2.0/logout"
+    #         "?post_logout_redirect_uri=" + url_for('login', _external=True)
+    # )
+    #
+    # return redirect(microsoft_logout_url)
     return redirect('/login')
 
 allowed_extensions= {'pdf'}
@@ -139,13 +154,13 @@ def allowed_file(filename):
 @app.route('/main')
 @login_required
 def serve_form():
-    return render_template('ap_upload_test.html')
+    return render_template('ap_upload_test.html', user_name=session.get('user_name'))
 
-# @app.route('/')
-# @login_required
-# def serve_main():
-#
-#     return
+@app.route('/')
+@login_required
+def serve_main():
+
+    return
 
 # @app.route('/favicon.ico')
 # def favicon():
@@ -192,7 +207,7 @@ def upload_file():
     est_check_log = request.form.get('Estimate Check')
 
     print(f"Fixed asset: {fa_check_log}. Estimate: {est_check_log}")
-    submitter = current_user.id
+    submitter = request.form.get('Submitter')
 
 
         # uploaded_file.save(os.path.join(UPLOAD_FOLDER, uploaded_file.filename))
@@ -242,6 +257,7 @@ def upload_file():
         # print(f"Vendor:{vendor} "  f"Invoice Date: {invoice_dt} " f"Amount: {amount} " f"GL Code List: {gl_codes} "
         # f"Department: {department} " f"Fixed Asset Check:{fa_check} " f"Estimate Check: {est_check} " f"Gl Code
         # Amount List: {gl_code_amounts} " f"Gl Code Amount List: {project_ids}")
+        flash("Successfully submitted.")
         return redirect(url_for('serve_form'))
         # return f"Success! File saved to: {save_path1} and {save_path2} with accrual id: {main_accrual_tag}."
 

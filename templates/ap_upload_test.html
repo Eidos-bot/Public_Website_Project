@@ -165,6 +165,13 @@
 
     <br/><br/>
 
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul> {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
     <!--Or use localhost instead of the ip for action if using local network. Will look for home ip to test there. and with full domain, it seems to not need the full path.-->
 
     <form action="/upload" method="post" enctype="multipart/form-data">
@@ -232,7 +239,7 @@
 
             <div class="submitter_objs">
 
-                <div class="child sub"><label>Submitter<input id="submitter" name="Submitter" type="text" required/></label><button type="submit" id="submit_button" >Upload</button></div>
+                <div class="child sub"><label>Submitter<input id="submitter" name="Submitter" type="text" value="{{ user_name }}" readonly/></label><button type="submit" id="submit_button" >Upload</button></div>
 
 <!--                Remember to add approver section and align it probably-->
 

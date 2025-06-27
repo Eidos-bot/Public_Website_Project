@@ -219,9 +219,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
                 let hiddenPrepaidElements = document.getElementById("hiddenPrePaidDetailsId")
                 hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = true)
-                orgGlCodeInputElementd.value = "1404051000"
-                orgGlCodeInputElementd.readOnly = true
-                orgGlCodeInputElementd.style.color = "red"
+                // orgGlCodeInputElementd.value = "1404051000"
+                // orgGlCodeInputElementd.readOnly = true
+                // orgGlCodeInputElementd.style.color = "red"
                 //console.log(orgGlCodeInputElementd)
             }
             else {
@@ -253,9 +253,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
                 let hiddenPrepaidElements = document.getElementById(`hiddenPrePaidDetailsId${isoId}`)
                 hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = true)
-                nonorgGlCodeInputElementd.value = "1404051000"
-                nonorgGlCodeInputElementd.readOnly = true
-                nonorgGlCodeInputElementd.style.color = "red"
+                // nonorgGlCodeInputElementd.value = "1404051000"
+                // nonorgGlCodeInputElementd.readOnly = true
+                // nonorgGlCodeInputElementd.style.color = "red"
                 //console.log(nonorgGlCodeInputElementd)
             }
 
@@ -269,9 +269,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 let hiddenPrepaidElements = document.getElementById("hiddenPrePaidDetailsId")
                 hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = false)
-                orgGlCodeInputElementd.value = ""
-                orgGlCodeInputElementd.readOnly = false
-                orgGlCodeInputElementd.style.color = "black"
+                // orgGlCodeInputElementd.value = ""
+                // orgGlCodeInputElementd.readOnly = false
+                // orgGlCodeInputElementd.style.color = "black"
                 //console.log(orgGlCodeInputElementd)
             }
             else {
@@ -282,9 +282,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
                 let hiddenPrepaidElements = document.getElementById(`hiddenPrePaidDetailsId${isoId}`)
                 hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = false)
-                nonorgGlCodeInputElementd.value = ""
-                nonorgGlCodeInputElementd.readOnly = false
-                nonorgGlCodeInputElementd.style.color = "black"
+                // nonorgGlCodeInputElementd.value = ""
+                // nonorgGlCodeInputElementd.readOnly = false
+                // nonorgGlCodeInputElementd.style.color = "black"
                 //console.log(nonorgGlCodeInputElementd)
             }
 

@@ -183,20 +183,20 @@ def serve_main():
 #     return send_from_directory(os.path.join(app.root_path, 'static'),
 #                           'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
+qualified_users = ["Christopher Dessources", "Jeffrey Dulow"]
+
 @app.route('/download-accruals')
 @login_required
 def download_excel():
-    # Query your data
-    df = pandas.read_sql('SELECT * FROM accruals', con=engine)
-
-    # Create in-memory Excel file
+    if session["user_name"] not in qualified_users:
+        df = pandas.read_sql('SELECT * FROM accruals WHERE "Submitter" = %(user)s', con=engine, params={"user": session["user_name"]})
+    else:
+        df = pandas.read_sql('SELECT * FROM accruals', con=engine)
     output = BytesIO()
     with pandas.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Accruals')
 
     output.seek(0)
-
-    # Serve the file
     return send_file(
         output,
         as_attachment=True,

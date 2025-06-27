@@ -21,6 +21,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const glGroupArray = document.getElementsByClassName("parent gl-parent")
     const glAmountTotalElement = document.getElementById("glAmountTotal")
 
+    const prepaidGroupElement = document.getElementById("prepaidGroup")
+    const prepaidPeriodLabelElement = document.getElementById("")
+
     let glGroupCounter = 0
     let glGroupIdTracker = 0
 
@@ -115,11 +118,107 @@ document.addEventListener("DOMContentLoaded", function() {
     // This is so I can disable the gl when the prepaid thing is checked.
     // Note to self: use readonly instead of disabled if you still want the values.
     function prePaidSet(listenTarget){
+
         let chosenId = listenTarget.id
         let isoId = chosenId.replace("pre_paid","")
+        let htmlTarget = ""
+        if(isoId ===""){
+            htmlTarget = `
+                      <div class='prepaidDetails' id='prePaidDetailsElement' style="display:flex; flex-direction:row;">
+                        <div class='child gl-child'>
+                          <label id="prepaidLabel" style="display: flex; flex-direction: column; align-items: center; margin-top: 0;">
+                            Period
+                            <input id="pre_paid_period" name="prepaidPeriod" type="number" max="31" min="1" value="1" style="width: 25px; display: flex; flex-direction: column; align-items: center; gap: 4px;" required/>
+                          </label>
+                        </div>
+                    
+                        <label style="margin-top: 0; padding-top: 0;">
+                          D/M/Y
+                          <select id="dmy" name="Days/Months/Years" style="width:65px">
+                            <option value="Days">Days</option>
+                            <option value="Months">Months</option>
+                            <option value="Year">Year</option>
+                          </select>
+                        </label>
+                        <label style="margin-top: 0; padding-top: 0;">
+                          FY
+                          <select id="FY" name="Fiscal Year" style="width:65px">
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                          </select>
+                        </label>
+                        
+                      </div>`
+        }
+        else{
+            htmlTarget = `
+                      <div class='prepaidDetails' id='prePaidDetailsElement${isoId}' style="display:flex; flex-direction:row;">
+                        <div class='child gl-child'>
+                          <label id="prepaidLabel${isoId}" style="display: flex; flex-direction: column; align-items: center; margin-top: 0;">
+                            Period
+                            <input id="pre_paid_period${isoId}" name="prepaidPeriod" type="number" max="31" min="1" value="1" style="width: 25px; display: flex; flex-direction: column; align-items: center; gap: 4px;" required/>
+                          </label>
+                        </div>
+                    
+                        <label style="margin-top: 0; padding-top: 0;">
+                          D/M/Y
+                          <select id="dmy${isoId}" name="Days/Months/Years" style="width:65px">
+                            <option value="Days">Days</option>
+                            <option value="Months">Months</option>
+                            <option value="Year">Year</option>
+                          </select>
+                        </label>
+                        
+                        <label style="margin-top: 0; padding-top: 0;">
+                          FY
+                          <select id="FY${isoId}" name="Fiscal Year" style="width:65px">
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
+                            <option value="31">31</option>
+                          </select>
+                        </label>
+                      </div>`
+        }
         if(listenTarget.checked){
+
             if(isoId === ""){
+
                 const orgGlCodeInputElementd = document.getElementById("GL")
+                if(document.getElementById("prePaidDetailsElement")===null){
+                    let prepaidCheckElement = document.getElementById("prepaidCheckBox")
+
+                    prepaidCheckElement.insertAdjacentHTML("afterend",htmlTarget)
+                    let dmyElement = document.getElementById('dmy')
+                    dmyElement.addEventListener("change",function()
+                        {if(dmyElement.value==="Year"){
+                        let prepaidPeriodElement = document.getElementById("pre_paid_period")
+                        prepaidPeriodElement.max = 1
+                        prepaidPeriodElement.value = 1
+
+                        }
+                        else if(dmyElement.value==="Months"){
+                            let prepaidPeriodElement = document.getElementById("pre_paid_period")
+                            prepaidPeriodElement.max = 12
+                            prepaidPeriodElement.value = 1
+
+                        }
+                        else if(dmyElement.value==="Days"){
+                            let prepaidPeriodElement = document.getElementById("pre_paid_period")
+                            prepaidPeriodElement.max = 12
+                            prepaidPeriodElement.value = 1
+                        }
+                        }
+                    )
+                }
+                let hiddenPrepaidElements = document.getElementById("hiddenPrePaidDetailsId")
+                hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = true)
                 orgGlCodeInputElementd.value = "1404051000"
                 orgGlCodeInputElementd.readOnly = true
                 orgGlCodeInputElementd.style.color = "red"
@@ -127,6 +226,33 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             else {
                 const nonorgGlCodeInputElementd = document.getElementById("GL"+isoId)
+                if(document.getElementById("prePaidDetailsElement"+isoId)===null) {
+                    const prepaidCheckElement = document.getElementById("prepaidCheckBox" + isoId)
+                    prepaidCheckElement.insertAdjacentHTML("afterend", htmlTarget)
+                    let dmyElement = document.getElementById(`dmy${isoId}`)
+                    dmyElement.addEventListener("change",function()
+                        {if(dmyElement.value==="Year"){
+                        let prepaidPeriodElement = document.getElementById(`pre_paid_period${isoId}`)
+                        prepaidPeriodElement.max = 1
+                        prepaidPeriodElement.value = 1
+
+                        }
+                        else if(dmyElement.value==="Months"){
+                            let prepaidPeriodElement = document.getElementById(`pre_paid_period${isoId}`)
+                            prepaidPeriodElement.max = 12
+                            prepaidPeriodElement.value = 1
+
+                        }
+                        else if(dmyElement.value==="Days"){
+                            let prepaidPeriodElement = document.getElementById(`pre_paid_period${isoId}`)
+                            prepaidPeriodElement.max = 12
+                            prepaidPeriodElement.value = 1
+                        }
+                        }
+                    )
+                }
+                let hiddenPrepaidElements = document.getElementById(`hiddenPrePaidDetailsId${isoId}`)
+                hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = true)
                 nonorgGlCodeInputElementd.value = "1404051000"
                 nonorgGlCodeInputElementd.readOnly = true
                 nonorgGlCodeInputElementd.style.color = "red"
@@ -137,6 +263,12 @@ document.addEventListener("DOMContentLoaded", function() {
         else {
             if(isoId === ""){
                 const orgGlCodeInputElementd = document.getElementById("GL")
+
+                const prePaidDetailsElement = document.getElementById("prePaidDetailsElement")
+                prePaidDetailsElement.remove()
+
+                let hiddenPrepaidElements = document.getElementById("hiddenPrePaidDetailsId")
+                hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = false)
                 orgGlCodeInputElementd.value = ""
                 orgGlCodeInputElementd.readOnly = false
                 orgGlCodeInputElementd.style.color = "black"
@@ -144,6 +276,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             else {
                 const nonorgGlCodeInputElementd = document.getElementById("GL"+isoId)
+
+                const prePaidDetailsElement = document.getElementById("prePaidDetailsElement"+isoId)
+                prePaidDetailsElement.remove()
+
+                let hiddenPrepaidElements = document.getElementById(`hiddenPrePaidDetailsId${isoId}`)
+                hiddenPrepaidElements.querySelectorAll('input').forEach(el => el.disabled = false)
                 nonorgGlCodeInputElementd.value = ""
                 nonorgGlCodeInputElementd.readOnly = false
                 nonorgGlCodeInputElementd.style.color = "black"
@@ -182,6 +320,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let newRemoveButtonId = `${removeButtonElement.id}${glGroupIdTracker}`
         let newRemoveButtonElement = document.getElementById(newRemoveButtonId);
         let newProjIdElement = document.getElementById(newProjId);
+
         console.log("The new remove id seen is:" + newRemoveButtonId)
         newProjIdElement.style.display='flex';
         newProjIdElement.style.flexDirection='row';
@@ -208,8 +347,8 @@ document.addEventListener("DOMContentLoaded", function() {
         let childNodeIds = elementNode.querySelectorAll("[id]")
 
         childNodeIds.forEach(function(nodeId) {
-            //console.log(nodeId)
-
+            console.log(`${nodeId}`)
+            nodeId.querySelectorAll('input').forEach(el => el.disabled = false)
             if(nodeId.type==="text"){
                 nodeId.value=''
                 nodeId.readOnly=false
@@ -220,6 +359,9 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             else if(nodeId.type==="number"){
                 nodeId.value = ''
+            }
+            else if(nodeId.className === "prepaidDetails"){
+                nodeId.remove()
             }
 
 

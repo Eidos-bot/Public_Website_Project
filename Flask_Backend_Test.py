@@ -232,6 +232,12 @@ def upload_file():
         project_ids = request.form.getlist('Project ID')
         liabilities = ["4-6-0605-2000" if x.startswith("4") else "1-6-0610-2000" for x in gl_codes]
 
+
+
+        prepaid_fys = request.form.getlist('Fiscal Year')
+        prepai_period = request.form.getlist('prepaidPeriod')
+        prepaid_dmy = request.form.getlist('Days/Months/Years')
+
         vendor = request.form.get('Vendor')
         invoice_dt = request.form.get('Invoice Date')
         amount = request.form.get('Gl Amount Total')
@@ -243,6 +249,7 @@ def upload_file():
         fa_check_log = request.form.get('Asset Check')
         est_check_log = request.form.get('Estimate Check')
 
+        print(f"Prepaid Fiscal Year: {prepaid_fys}. Period: {prepai_period}. Days/Months/Years: {prepaid_dmy}.")
         print(f"Fixed asset: {fa_check_log}. Estimate: {est_check_log}")
         submitter = request.form.get('Submitter')
 
@@ -266,6 +273,9 @@ def upload_file():
             accrual_entry_df['Department'] = department
             accrual_entry_df['Accrual Tag'] = main_accrual_tag
 
+            accrual_entry_df['Prepaid Year'] = prepaid_fys
+            accrual_entry_df['Prepaid Period'] = prepai_period
+            accrual_entry_df['Days/Months/Years'] = prepaid_dmy
 
             filename = secure_filename(uploaded_file.filename)
             save_path1 = os.path.join(UPLOAD_FOLDER, filename)

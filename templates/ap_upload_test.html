@@ -94,9 +94,9 @@
         }
 
         /* Hide spin buttons in Firefox */
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
+/*         input[type="number"] { */
+/*             -moz-appearance: textfield; */
+/*       } */
          .sidebar{
              padding:30px;
              margin-top: 50px;
@@ -115,13 +115,14 @@
          .projectIdClass{
              display:flex;
              flex-direction:row;
-
          }
 
          }
          /*This makes sure the remove button is on the bottom.*/
          #removeGlClass{
+
             margin-top:auto;
+
          }
          .gl-parent {
              display: flex;
@@ -131,6 +132,7 @@
             .gl-child {
               flex: 0;
             }
+
 
          .status_checks {
              display:flex;
@@ -143,6 +145,16 @@
              margin-top:20px;
              display: flex;
          }
+
+         #prepaidLabel{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+
+         }
+
+
          .child sub {
              flex:0;
          }
@@ -187,17 +199,29 @@
 
             <div id="glGroup" class='parent gl-parent' >
 
-                <div class='child gl-child'><label>GL Code<input minlength="10" maxlength="10" id="GL" name="GL" type="text" required/></label></div>
+                <div class='child gl-child'><label>GL Code<input minlength="10" maxlength="10" id="GL" name="GL" type="text" pattern="[0-9]{10}" title="Enter 10 digit GL Code" required/></label></div>
                 <div class='child gl-child'><label>Project ID<input id="ProjectID" name="Project ID" type="text"/></label></div>
                 <div class="projectIdClass" id="projIdClassId">
 
 <!--                    I wanted to make it so the button was row aligned to the right of the project id input. But bottom right.-->
 
-                    <div class='child gl-child'><label>Amount<input id="amt" name="Amount" step="0.01" type="number" required/></label></div>
+                    <div class='child gl-child'><label >Amount<input id="amt" name="Amount" step="0.01" type="number" required/></label></div>
                     <div class='child gl-child' id="removeGlClass"><button id="removeGroup" type="button">-</button></div>
 
-                    <div class='child gl-child'><label>PreP<input id="pre_paid" name="Prepaid" type="checkbox"/></label></div>
+<!-- Until I'm told otherwise, the best way to keep styles on unique cloned elements is to put the style within the element. -->
 
+                    <div id="prepaidGroup" class="child gl-child" style="margin-top:15px;display:flex;flex-direction: row;border:1px solid #000000;border-radius: 3px;width:fit-content;height:fit-content;">
+                        <div class='child gl-child' id ="prepaidCheckBox"><label style="margin-top: 0; padding-top: 0;">PreP<input id="pre_paid" name="Prepaid" type="checkbox"/></label></div>
+                        <div class="hiddenPrePaidDetails" id="hiddenPrePaidDetailsId">
+                            <input type="hidden" name="prepaidPeriod" value="None">
+                            <input type="hidden" name="Days/Months/Years" value="None">
+                            <input type="hidden" name="Fiscal Year" value="None">
+                        </div>
+<!--                     This will get added or disabled to the prepaid group -->
+
+
+
+                    </div>
                 </div>
 
             </div>
@@ -302,7 +326,5 @@
 
     <script src="../static/ap_upload_test.js"></script>
 </body>
-
-
 
 </html>

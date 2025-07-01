@@ -122,7 +122,7 @@ def auth_callback():
 
     if email not in users:
         users[email] = {'password': None}
-    if not email.endswith("@brooklaw.edu"):
+    if not email == "christopher.dessourc@brooklaw.edu":
         flash("You must login with a brooklaw.edu email address.")
         return redirect('/login')
     full_name = user_info.get("displayName")

@@ -13,6 +13,7 @@ from io import BytesIO
 from Password_Creation_Simple_Test import create_password
 from sqlalchemy import create_engine, text
 import openpyxl
+from sqlalchemy.exc import OperationalError
 
 DATABASE_URL = (
     "postgresql://eidos:L0SrVaedulB9tnFzkUoc2twhIbWVAGz9@"
@@ -53,8 +54,6 @@ def load_user(user_id):
 @app.route('/account_creation', methods=['GET', 'POST'])
 def serve_ac_form():
     return render_template('account_creation_page.html')
-
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -123,7 +122,7 @@ def auth_callback():
     if email not in users:
         users[email] = {'password': None}
 
-    #if not email.endswith("@brooklaw.edu"):
+    # if not email.endswith("@brooklaw.edu"):
     if not email == "christopher.dessourc@brooklaw.edu":
         flash("You must login with a brooklaw.edu email address.")
         return redirect('/login')
@@ -185,26 +184,36 @@ def serve_main():
 #     return send_from_directory(os.path.join(app.root_path, 'static'),
 #                           'favicon.ico',mimetype='image/vnd.microsoft.icon')
 
+@app.route('/other-projects')
+@login_required
+def other_projects():
+    return render_template('ProjectsPage.html')
+
 qualified_users = ["Christopher Dessources", "Jeffrey Dulow"]
 
 @app.route('/download-accruals')
 @login_required
 def download_excel():
-    if session["user_name"] not in qualified_users:
-        df = pandas.read_sql('SELECT * FROM accruals WHERE "Submitter" = %(user)s', con=engine, params={"user": session["user_name"]})
-    else:
-        df = pandas.read_sql('SELECT * FROM accruals', con=engine)
-    output = BytesIO()
-    with pandas.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Accruals')
+    try:
+        if session["user_name"] not in qualified_users:
+            df = pandas.read_sql('SELECT * FROM accruals WHERE "Submitter" = %(user)s', con=engine, params={"user": session["user_name"]})
+        else:
+            df = pandas.read_sql('SELECT * FROM accruals', con=engine)
+        output = BytesIO()
+        with pandas.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Accruals')
 
-    output.seek(0)
-    return send_file(
-        output,
-        as_attachment=True,
-        download_name='accruals_export.xlsx',
-        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+        output.seek(0)
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name='accruals_export.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    except OperationalError:
+        flash("Database is not connected. Please try again later.", "info")
+        return redirect('/main')
+
 
 # make sure to have '/upload' in the action link. Without it, you get a 405 error from post requests.
 @app.route('/upload', methods=['POST'])

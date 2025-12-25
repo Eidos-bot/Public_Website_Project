@@ -96,7 +96,7 @@ def login_microsoft():
     session['oauth_state'] = state
     return redirect(auth_url)
 
-@app.route('/auth/callback')
+@app.route('/auth/ms-callback')
 def auth_callback():
     oauth = OAuth2Session(
         os.getenv("CLIENT_ID"),

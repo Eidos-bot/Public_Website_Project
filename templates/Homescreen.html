@@ -30,17 +30,11 @@
                 color:#ffffff;
                 font-size: 12px
             }
-            form {
-                {#justify-content:center;#}
-                margin: 100px auto;
+            #pageContainer {
                 display: flex;
                 flex-direction: column;
-                border-radius: 18px;
-                background-color: #630e0e;
-                padding: 40px;
-                width: 400px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                color: white;
+                align-items: center;
+                margin-top: 150px;
             }
 
             .ms-login-button {
@@ -65,6 +59,34 @@
                 height: 20px;
                 margin-right: 10px;
             }
+            #loginContainer {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 40px;
+                width: 100%;
+            }
+            form {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 18px;
+                background-color: #630e0e;
+                padding: 40px;
+                width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                color: white;
+            }
+
+            #regularLogin {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            label{
+                width:fit-content;
+            }
         </style>
     </head>
 <body>
@@ -80,13 +102,34 @@
 
     </header>
     <br/><br/>
+    <div id="pageContainer">
 
-    <form method="post">
-        <a href="{{ url_for('login_microsoft') }}" class="ms-login-button">
-          <img src="{{ url_for('static', filename='microsoft-logo.png') }}" alt="Microsoft logo" class="ms-logo">
-          Log in with Microsoft
-        </a>
-    </form>
+        <div id="loginContainer">
+
+            <form id="regularLogin" action="{{ url_for('login') }}" method="post">
+                <label>
+                    <input type="text" name="username" placeholder="Username">
+                </label>
+                <label>
+                    <input type="password" name="password" placeholder="Password">
+                </label>
+
+                <button type="submit">
+                    Log In
+                </button>
+            </form>
+
+            <form id="microsoftLogin" method="post">
+                <a href="{{ url_for('login_microsoft') }}" class="ms-login-button">
+                  <img src="{{ url_for('static', filename='microsoft-logo.png') }}" alt="Microsoft logo" class="ms-logo">
+                  Log in with Microsoft
+                </a>
+            </form>
+
+        </div>
+
+    </div>
+
 </body>
 
 </html>

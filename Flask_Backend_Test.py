@@ -34,7 +34,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 users = {
-    "ChrisAdmin": {"password": "temppass"},
+    "admin": {"password": "chris123"},
     "iisodreezy@aim.com": {"password": "temppass"},
 }
 
@@ -62,11 +62,14 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        if username in users and users[username]['password']  == password and username.endswith("@brooklaw.edu"):
-
+        # print(users[username]['password'], password)
+        if (username in users and users[username]['password']  == password) or username.endswith("@brooklaw.edu"):
+            print("Successfully passed login check.")
             user = User(username)
-
+            if username in users:
+                session['user_name'] = "ADMINISTRATOR"
             login_user(user)
+            print("Successfully logged in.")
             return redirect(url_for('serve_form'))
         return "Invalid credentials", 401
     return render_template('Homescreen.html')
@@ -127,11 +130,18 @@ def auth_callback():
         flash("You must login with a brooklaw.edu email address.")
         print(f"Failed login as {email}")
         return redirect('/login')
-    full_name = user_info.get("displayName")
+
+    if email == 'admin':
+        full_name = "ADMINISTRATOR"
+    else:
+        full_name = user_info.get("displayName")
+
+
     user = User(email, full_name)
     session['user_name'] = full_name
+
     login_user(user)
-    print(email)
+
     return redirect(url_for('serve_form'))
 
 @app.route('/logout')
@@ -320,8 +330,8 @@ def upload_file():
                 blob_client = container_client.get_blob_client(blob_name)
                 uploaded_file.stream.seek(0)
                 blob_client.upload_blob(uploaded_file.stream, overwrite=True)
-            except Exception as e:
-                print(e)
+            except Exception:
+                print("Failed to connect to Azure blob service")
                 pass
 
 

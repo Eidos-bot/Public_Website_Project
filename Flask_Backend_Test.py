@@ -35,6 +35,7 @@ login_manager.login_view = 'login'
 
 users = {
     "ChrisAdmin": {"password": "temppass"},
+    "iisodreezy@aim.com": {"password": "temppass"},
 }
 
 
@@ -120,10 +121,11 @@ def auth_callback():
 
     if email not in users:
         users[email] = {'password': None}
-
-    if not email.endswith("@brooklaw.edu"):
+    email = email.lower().strip()
+    if not email.endswith("@brooklaw.edu") and email not in users.keys():
     # if not email == "christopher.dessourc@brooklaw.edu":
         flash("You must login with a brooklaw.edu email address.")
+        print(f"Failed login as {email}")
         return redirect('/login')
     full_name = user_info.get("displayName")
     user = User(email, full_name)
@@ -341,5 +343,6 @@ if __name__ == '__main__':
     # Date
 
 #command prompt is: ngrok http --url=eidos-tests.ngrok.app 80 --basic-auth="bls:bls11201"
+#You need to go via http://localhost:5000/main since i use local host as the redirect url.
 # inventory number vendor name gl code submitter
 # if fixed asset, must start with a 4 and must have project code, 13 digit long

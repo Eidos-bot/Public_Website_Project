@@ -135,6 +135,10 @@
                     <input type="password" name="password" placeholder="Password">
                 </label>
 
+                {% if password_check %}
+                {{ password_check }}
+                {% endif %}
+
                 <button type="submit">
                     Log In
                 </button>
@@ -145,7 +149,17 @@
                   <img src="{{ url_for('static', filename='microsoft-logo.png') }}" alt="Microsoft logo" class="ms-logo">
                   Log in with Microsoft
                 </a>
-                <div>*Only brooklaw emails!</div>
+                <div style="color:red;">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div style="color: red;">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
             </form>
 
         </div>

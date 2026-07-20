@@ -27,17 +27,19 @@ engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=True)
 load_dotenv()
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+EIDOS_SECRET_KEY = os.getenv('EIDOS_SECRET')
 
 # UPLOAD_FOLDER = r"Z:\Test Files"
 # UPLOAD_WORKFOLDER =  r"T:\Accounts Payable\AP WORKING FOLDER\AP Invoices\11 MAY 2025\05-06-2025\Chris\Test Network"
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-
-users = {
-    "admin": {"password": "chris123"},
-    "iisodreezy@aim.com": {"password": "temppass"},
+login_manager.login_message = None
+users ={}
+admins = {
+    "admin": {"password": "chris123"}
 }
+personal = ["iisodreezy@aim.com"]
 
 
 class User(UserMixin):
@@ -49,6 +51,8 @@ class User(UserMixin):
 def load_user(user_id):
     if user_id in users:
 
+        return User(user_id)
+    elif user_id in admins:
         return User(user_id)
 
     return None
@@ -64,17 +68,19 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         # print(users[username]['password'], password)
-        if (username in users and users[username]['password']  == password) or username.endswith("@brooklaw.edu"):
+        if (username in admins and admins[username]['password']  == password) or (username in personal) or (username.endswith("@brooklaw.edu") and users[username]['password'] == EIDOS_SECRET_KEY):
             print("Successfully passed login check.")
             user = User(username)
-            if username in users:
+            if username in admins:
                 session['user_name'] = "ADMINISTRATOR"
             login_user(user)
             print("Successfully logged in.")
-            return redirect(url_for('serve_form'))
-        print("Invalid username or password.")
-        session.clear()
-        return redirect('/')
+            return redirect('/')
+        else:
+            print("Invalid username or password.")
+            session.clear()
+            flash("Invalid username or password.")
+            return redirect(url_for('login'))
 
     return render_template('Homescreen.html')
 # ip_filter = IPFilter(app, ruleset=Whitelist())
@@ -112,6 +118,7 @@ def auth_callback():
         redirect_uri=os.getenv("REDIRECT_URI"),
         state=session.get('oauth_state')
     )
+
     print(oauth.state)
 
     # Its annoying that its gray, but the value
@@ -121,38 +128,44 @@ def auth_callback():
         client_secret=os.getenv("CLIENT_SECRET"),
         authorization_response=request.url
     )
+        # session.pop('oauth_state', None)
     except errors.AccessDeniedError:
         print("Access denied, please make sure your admin/IT allows this app access.")
         session.clear()
+        flash("Please check with admin/IT to add permissions for this site.")
         return redirect('/')
 
     user_info = oauth.get(USER_INFO_URL).json()
     email = user_info.get("mail") or user_info.get("userPrincipalName")
-
+    email = email.lower().strip()
     if not email:
         return "Unable to retrieve email address.", 400
 
     if email not in users:
         users[email] = {'password': None}
-    email = email.lower().strip()
-    if not email.endswith("@brooklaw.edu") and email not in users.keys():
+
+    if not email.endswith("@brooklaw.edu") and email not in admins.keys():
     # if not email == "christopher.dessourc@brooklaw.edu":
-        flash("You must login with a brooklaw.edu email address.")
-        print(f"Failed login as {email}")
-        return redirect('/login')
 
-    if email == 'admin':
-        full_name = "ADMINISTRATOR"
+        session.clear()
+        flash("Only Brooklaw emails. Sorry!")
+        return redirect('/')
+
     else:
-        full_name = user_info.get("displayName")
+        print("Valid user:", email)
+        if email == 'admin':
+            full_name = "ADMINISTRATOR"
+        else:
+            full_name = user_info.get("displayName")
+        if email.endswith("@brooklaw.edu"):
+            users[email]['password']=EIDOS_SECRET_KEY
 
+        user = User(email, full_name)
+        session['user_name'] = full_name
 
-    user = User(email, full_name)
-    session['user_name'] = full_name
+        login_user(user)
 
-    login_user(user)
-
-    return redirect(url_for('serve_form'))
+        return redirect(url_for('serve_form'))
 
 @app.route('/logout')
 def logout():
@@ -190,6 +203,7 @@ def allowed_file(filename):
 @app.route('/main')
 @login_required
 def serve_form():
+    print("Serving main page.")
     return render_template('ap_upload_test.html', user_name=session.get('user_name'))
 
 @app.route('/')

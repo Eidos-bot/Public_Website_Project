@@ -84,6 +84,10 @@
                 flex-direction: column;
                 gap: 10px;
             }
+            #microsoftLogin{
+                display: flex;
+                flex-direction: column;
+            }
             label{
                 width:fit-content;
             }
@@ -124,6 +128,7 @@
                   <img src="{{ url_for('static', filename='microsoft-logo.png') }}" alt="Microsoft logo" class="ms-logo">
                   Log in with Microsoft
                 </a>
+                <div>*Only brooklaw emails!</div>
             </form>
 
         </div>

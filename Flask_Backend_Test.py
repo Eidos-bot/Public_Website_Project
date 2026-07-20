@@ -9,6 +9,7 @@ import pandas
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 from dotenv import load_dotenv
 from requests_oauthlib import OAuth2Session
+from oauthlib.oauth2.rfc6749 import errors
 from io import BytesIO
 from Password_Creation_Simple_Test import create_password
 from sqlalchemy import create_engine, text
@@ -71,7 +72,10 @@ def login():
             login_user(user)
             print("Successfully logged in.")
             return redirect(url_for('serve_form'))
-        return "Invalid credentials", 401
+        print("Invalid username or password.")
+        session.clear()
+        return redirect('/')
+
     return render_template('Homescreen.html')
 # ip_filter = IPFilter(app, ruleset=Whitelist())
 # ip_filter.ruleset.permit()
@@ -98,6 +102,7 @@ def login_microsoft():
     )
     auth_url, state = oauth.authorization_url(AUTH_BASE_URL, prompt = 'select_account')
     session['oauth_state'] = state
+    print("login state", state)
     return redirect(auth_url)
 
 @app.route('/auth/ms-callback')
@@ -110,11 +115,16 @@ def auth_callback():
     print(oauth.state)
 
     # Its annoying that its gray, but the value
-    oauth.fetch_token(
+    try:
+        oauth.fetch_token(
         TOKEN_URL,
         client_secret=os.getenv("CLIENT_SECRET"),
         authorization_response=request.url
     )
+    except errors.AccessDeniedError:
+        print("Access denied, please make sure your admin/IT allows this app access.")
+        session.clear()
+        return redirect('/')
 
     user_info = oauth.get(USER_INFO_URL).json()
     email = user_info.get("mail") or user_info.get("userPrincipalName")
@@ -200,7 +210,12 @@ def serve_main():
 def other_projects():
     return render_template('ProjectsPage.html')
 
-qualified_users = ["Christopher Dessources", "Jeffrey Dulow"]
+qualified_users = ["Christopher Dessources", "Jeffrey Dulow", "admin"]
+
+@app.route('/remote-api', methods=['POST', 'GET'])
+def remote_api():
+    print(request.json)
+    return {'status': 'OK'}
 
 @app.route('/download-accruals')
 @login_required

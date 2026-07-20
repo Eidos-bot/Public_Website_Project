@@ -22,8 +22,25 @@
                 font-weight: 700;
                 position: fixed;
                 width: 100%;
-                border:1px solid #000000
+                border:1px solid #000000;
 
+            }
+            footer {
+                background-color: #630e0e;
+                color: #ffffff;
+                border:1px solid #000000;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: fit-content;
+                display:flex;
+                flex-direction:row;
+                gap:20px;
+            }
+            .emailContacts{
+                display:flex;
+                flex-direction:column;
             }
 
             h1 {
@@ -134,7 +151,17 @@
         </div>
 
     </div>
-
+    <footer>
+        <div class="emailContacts">
+            <div style="text-decoration: underline;">Email</div>
+            <a href="mailto:christopher.dessourc@brooklaw.edu">Work</a>
+            <a href="mailto:chrisdessources@gmail.com">Personal</a>
+        </div>
+        <div class="emailContacts">
+            <div style="text-decoration: underline;">Phone</div>
+            <div>929-539-8015</div>
+        </div>
+    </footer>
 </body>
 
 </html>

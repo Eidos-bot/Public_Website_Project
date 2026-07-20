@@ -132,7 +132,7 @@ def auth_callback():
     except errors.AccessDeniedError:
         print("Access denied, please make sure your admin/IT allows this app access.")
         session.clear()
-        flash("Please check with admin/IT to add permissions for this site.")
+        flash("Please check with admin/IT to add permissions for this site!")
         return redirect('/')
 
     user_info = oauth.get(USER_INFO_URL).json()

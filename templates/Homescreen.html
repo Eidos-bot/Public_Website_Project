@@ -143,23 +143,23 @@
                     Log In
                 </button>
             </form>
-
+            <div style="color:red;">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div style="color: red;">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
             <form id="microsoftLogin" method="post">
                 <a href="{{ url_for('login_microsoft') }}" class="ms-login-button">
                   <img src="{{ url_for('static', filename='microsoft-logo.png') }}" alt="Microsoft logo" class="ms-logo">
                   Log in with Microsoft
                 </a>
-                <div style="color:red;">
-                    {% with messages = get_flashed_messages() %}
-                        {% if messages %}
-                            {% for message in messages %}
-                                <div style="color: red;">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                </div>
+
             </form>
 
         </div>

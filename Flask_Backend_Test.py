@@ -79,6 +79,7 @@ def login():
         else:
             print("Invalid username or password.")
             session.clear()
+            session.pop('_flashes', None)
             flash("Invalid username or password.")
             return redirect(url_for('login'))
 
@@ -132,6 +133,7 @@ def auth_callback():
     except errors.AccessDeniedError:
         print("Access denied, please make sure your admin/IT allows this app access.")
         session.clear()
+        session.pop('_flashes', None)
         flash("Please check with admin/IT to add permissions for this site!")
         return redirect('/')
 
@@ -148,6 +150,7 @@ def auth_callback():
     # if not email == "christopher.dessourc@brooklaw.edu":
 
         session.clear()
+        session.pop('_flashes', None)
         flash("Only Brooklaw emails. Sorry!")
         return redirect('/')
 

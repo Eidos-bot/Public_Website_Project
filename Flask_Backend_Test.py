@@ -113,6 +113,7 @@ def login_microsoft():
         red_uri_str = "REND_REDIRECT_URI"
         print("Using Render.")
     else:
+        print(f"{request.host_url} is the base url.")
         flash("The url you're using doesn't match the valid redirect URIs.")
         return redirect('/')
     oauth = OAuth2Session(

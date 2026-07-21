@@ -106,9 +106,12 @@ def login_microsoft():
     if request.host_url == "https://eidos-tests.ngrok.app/":
         red_uri_str = "NGROK_REDIRECT_URI"
         print("Using NGROK.")
-    elif request.host_url == "http://localhost:5000/" or request.host_url == "https://journey2eidos.com/":
+    elif request.host_url == "http://localhost:5000/":
         red_uri_str = "LOCAL_REDIRECT_URI"
         print("Using Local.")
+    elif request.host_url == "https://journey2eidos.com/":
+        red_uri_str = "REND_REDIRECT_URI"
+        print("Using Render.")
     else:
         flash("The url you're using doesn't match the valid redirect URIs.")
         return redirect('/')

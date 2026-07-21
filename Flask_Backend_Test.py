@@ -37,9 +37,9 @@ login_manager.login_view = 'login'
 login_manager.login_message = None
 users ={}
 admins = {
-    "admin": {"password": "chris123"}
+    "ADMIN": {"password": "chris123"}
 }
-personal = ["iisodreezy@aim.com"]
+personal = ["isodreezy@aim.com"]
 
 
 class User(UserMixin):
@@ -72,7 +72,7 @@ def login():
             print("Successfully passed login check.")
             user = User(username)
             if username in admins:
-                session['user_name'] = "ADMINISTRATOR"
+                session['user_name'] = "ADMIN"
             login_user(user)
             print("Successfully logged in.")
             return redirect('/')
@@ -102,10 +102,20 @@ OAUTH_SCOPE = ['User.Read']
 
 @app.route('/login/microsoft')
 def login_microsoft():
+    print(request.host_url)
+    if request.host_url == "https://eidos-tests.ngrok.app/":
+        red_uri_str = "NGROK_REDIRECT_URI"
+        print("Using NGROK.")
+    elif request.host_url == "http://localhost:5000/":
+        red_uri_str = "LOCAL_REDIRECT_URI"
+        print("Using Local.")
+    else:
+        flash("The url you're using doesn't match the valid redirect URIs.")
+        return redirect('/')
     oauth = OAuth2Session(
         os.getenv("CLIENT_ID"),
         scope=OAUTH_SCOPE,
-        redirect_uri=os.getenv("REDIRECT_URI")
+        redirect_uri=os.getenv(red_uri_str)
     )
     auth_url, state = oauth.authorization_url(AUTH_BASE_URL, prompt = 'select_account')
     session['oauth_state'] = state
@@ -114,9 +124,19 @@ def login_microsoft():
 
 @app.route('/auth/ms-callback')
 def auth_callback():
+    print(request.host_url)
+    if request.host_url=="https://eidos-tests.ngrok.app/":
+        red_uri_str = "NGROK_REDIRECT_URI"
+        print("Using NGROK.")
+    elif request.host_url=="http://localhost:5000/":
+        red_uri_str = "LOCAL_REDIRECT_URI"
+        print("Using Local.")
+    else:
+        flash("The url you're using doesn't match the valid redirect URIs.")
+        return redirect('/')
     oauth = OAuth2Session(
         os.getenv("CLIENT_ID"),
-        redirect_uri=os.getenv("REDIRECT_URI"),
+        redirect_uri=os.getenv(red_uri_str),
         state=session.get('oauth_state')
     )
 
@@ -146,7 +166,7 @@ def auth_callback():
     if email not in users:
         users[email] = {'password': None}
 
-    if not email.endswith("@brooklaw.edu") and email not in admins.keys():
+    if not email.endswith("@brooklaw.edu") and email not in admins.keys() and email not in personal:
     # if not email == "christopher.dessourc@brooklaw.edu":
 
         session.clear()
@@ -238,22 +258,31 @@ def remote_api():
 @login_required
 def download_excel():
     try:
-        if session["user_name"] not in qualified_users:
-            df = pandas.read_sql('SELECT * FROM accruals WHERE "Submitter" = %(user)s', con=engine, params={"user": session["user_name"]})
-        else:
+        if session["user_name"] in admins or personal:
+            print(f"Attempting to download total excel from DB for {session['user_name']}.")
             df = pandas.read_sql('SELECT * FROM accruals', con=engine)
+            print("Successfully downloaded total excel from DB.")
+
+        else:
+            print(f"Attempting to download excel from DB for {session['user_name']}.")
+            df = pandas.read_sql('SELECT * FROM accruals WHERE "Submitter" = %(user)s', con=engine,
+                                 params={"user": session["user_name"]})
+            print("Successfully downloaded excel from DB.")
+
         output = BytesIO()
         with pandas.ExcelWriter(output, engine='openpyxl') as writer:
             df.to_excel(writer, index=False, sheet_name='Accruals')
 
         output.seek(0)
+        print("File downloaded.")
         return send_file(
             output,
             as_attachment=True,
             download_name='accruals_export.xlsx',
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-    except OperationalError:
+    except OperationalError as e:
+        print(f"Houston we have a database error: {e}")
         flash("Database is not connected. Please try again later.", "info")
         return redirect('/main')
 

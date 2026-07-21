@@ -212,17 +212,19 @@
     </div>
 
     </header>
-    <div class = "flash-messages">
+
+
+    <div style="color:red;">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                {% for msg in messages %}
-                    <div style="color: #000000; ">{{msg}}</div>
+                {% for message in messages %}
+                    <div style="color: red;">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
     </div>
-    <br/><br/>
-
 
     <!--Or use localhost instead of the ip for action if using local network. Will look for home ip to test there. and with full domain, it seems to not need the full path.-->
 

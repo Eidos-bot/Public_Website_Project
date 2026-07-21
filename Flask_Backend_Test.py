@@ -1,4 +1,4 @@
-from flask import Flask,request, render_template, redirect, url_for, session, flash, send_file
+from flask import Flask,request, render_template, redirect, url_for, session, flash, send_file, Response
 from azure.storage.blob import BlobServiceClient
 import sqlite3
 from werkzeug.utils import secure_filename
@@ -124,24 +124,13 @@ OAUTH_SCOPE = ['User.Read']
 @app.route('/login/microsoft')
 def login_microsoft():
     print(request.host_url)
-    # if request.host_url == "https://eidos-tests.ngrok.app/":
-    #     red_uri_str = "NGROK_REDIRECT_URI"
-    #     print("Using NGROK.")
-    # elif request.host_url == "http://localhost:5000/":
-    #     red_uri_str = "LOCAL_REDIRECT_URI"
-    #     print("Using Local.")
-    # elif request.host_url == "https://journey2eidos.com/":
-    #     red_uri_str = "REND_REDIRECT_URI"
-    #     print("Using Render.")
-    # else:
-    #     print(f"{request.host_url} is the base url.")
-    #     flash("The url you're using doesn't match the valid redirect URIs.")
-    #     return redirect('/')
-    red_uri_str = get_reduri(request)
+    red_uri = get_reduri(request)
+    if isinstance(red_uri, Response):
+        return red_uri
     oauth = OAuth2Session(
         os.getenv("CLIENT_ID"),
         scope=OAUTH_SCOPE,
-        redirect_uri=os.getenv(red_uri_str)
+        redirect_uri=os.getenv(red_uri)
     )
     auth_url, state = oauth.authorization_url(AUTH_BASE_URL, prompt = 'select_account')
     session['oauth_state'] = state
@@ -151,23 +140,12 @@ def login_microsoft():
 @app.route('/auth/ms-callback')
 def auth_callback():
     print(request.host_url)
-    # if request.host_url == "https://eidos-tests.ngrok.app/":
-    #     red_uri_str = "NGROK_REDIRECT_URI"
-    #     print("Using NGROK.")
-    # elif request.host_url == "http://localhost:5000/":
-    #     red_uri_str = "LOCAL_REDIRECT_URI"
-    #     print("Using Local.")
-    # elif request.host_url == "https://journey2eidos.com/":
-    #     red_uri_str = "REND_REDIRECT_URI"
-    #     print("Using Render.")
-    # else:
-    #     print(f"{request.host_url} is the base url.")
-    #     flash("The url you're using doesn't match the valid redirect URIs.")
-    #     return redirect('/')
-    red_uri_str = get_reduri(request)
+    red_uri = get_reduri(request)
+    if isinstance(red_uri, Response):
+        return red_uri
     oauth = OAuth2Session(
         os.getenv("CLIENT_ID"),
-        redirect_uri=os.getenv(red_uri_str),
+        redirect_uri=os.getenv(red_uri),
         state=session.get('oauth_state')
     )
 
@@ -313,7 +291,7 @@ def download_excel():
             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
     except OperationalError as e:
-        print(f"Houston we have a database error: {e}")
+        print(f"Houston we have a database error. Its likely that the network blocks anything inbound from port 5432.")
         flash("Database is not connected. Please try again later.", "info")
         return redirect('/main')
 
@@ -438,7 +416,7 @@ def upload_file():
         return "Fail, check the name again. No file received"
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 80))
     app.run(host='0.0.0.0', port=port)
 
     # Incoming IP: ['']

@@ -42,10 +42,31 @@ admins = {
 personal = ["isodreezy@aim.com"]
 
 
+
 class User(UserMixin):
     def __init__(self, username, name = None):
         self.id = username
         self.name = name
+
+def get_reduri(request_val):
+    print(request_val.host_url)
+
+    if request_val.host_url == "https://eidos-tests.ngrok.app/":
+        red_uri_str = "NGROK_REDIRECT_URI"
+        print("Using NGROK.")
+        return red_uri_str
+    elif request_val.host_url == "http://localhost:5000/":
+        red_uri_str = "LOCAL_REDIRECT_URI"
+        print("Using Local.")
+        return red_uri_str
+    elif request_val.host_url == "https://journey2eidos.com/":
+        red_uri_str = "REND_REDIRECT_URI"
+        print("Using Render.")
+        return red_uri_str
+    else:
+        print(f"{request_val.host_url} is the base url.")
+        flash("The url you're using doesn't match the valid redirect URIs.")
+        return redirect('/')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -103,19 +124,20 @@ OAUTH_SCOPE = ['User.Read']
 @app.route('/login/microsoft')
 def login_microsoft():
     print(request.host_url)
-    if request.host_url == "https://eidos-tests.ngrok.app/":
-        red_uri_str = "NGROK_REDIRECT_URI"
-        print("Using NGROK.")
-    elif request.host_url == "http://localhost:5000/":
-        red_uri_str = "LOCAL_REDIRECT_URI"
-        print("Using Local.")
-    elif request.host_url == "https://journey2eidos.com/":
-        red_uri_str = "REND_REDIRECT_URI"
-        print("Using Render.")
-    else:
-        print(f"{request.host_url} is the base url.")
-        flash("The url you're using doesn't match the valid redirect URIs.")
-        return redirect('/')
+    # if request.host_url == "https://eidos-tests.ngrok.app/":
+    #     red_uri_str = "NGROK_REDIRECT_URI"
+    #     print("Using NGROK.")
+    # elif request.host_url == "http://localhost:5000/":
+    #     red_uri_str = "LOCAL_REDIRECT_URI"
+    #     print("Using Local.")
+    # elif request.host_url == "https://journey2eidos.com/":
+    #     red_uri_str = "REND_REDIRECT_URI"
+    #     print("Using Render.")
+    # else:
+    #     print(f"{request.host_url} is the base url.")
+    #     flash("The url you're using doesn't match the valid redirect URIs.")
+    #     return redirect('/')
+    red_uri_str = get_reduri(request)
     oauth = OAuth2Session(
         os.getenv("CLIENT_ID"),
         scope=OAUTH_SCOPE,
@@ -129,19 +151,20 @@ def login_microsoft():
 @app.route('/auth/ms-callback')
 def auth_callback():
     print(request.host_url)
-    if request.host_url == "https://eidos-tests.ngrok.app/":
-        red_uri_str = "NGROK_REDIRECT_URI"
-        print("Using NGROK.")
-    elif request.host_url == "http://localhost:5000/":
-        red_uri_str = "LOCAL_REDIRECT_URI"
-        print("Using Local.")
-    elif request.host_url == "https://journey2eidos.com/":
-        red_uri_str = "REND_REDIRECT_URI"
-        print("Using Render.")
-    else:
-        print(f"{request.host_url} is the base url.")
-        flash("The url you're using doesn't match the valid redirect URIs.")
-        return redirect('/')
+    # if request.host_url == "https://eidos-tests.ngrok.app/":
+    #     red_uri_str = "NGROK_REDIRECT_URI"
+    #     print("Using NGROK.")
+    # elif request.host_url == "http://localhost:5000/":
+    #     red_uri_str = "LOCAL_REDIRECT_URI"
+    #     print("Using Local.")
+    # elif request.host_url == "https://journey2eidos.com/":
+    #     red_uri_str = "REND_REDIRECT_URI"
+    #     print("Using Render.")
+    # else:
+    #     print(f"{request.host_url} is the base url.")
+    #     flash("The url you're using doesn't match the valid redirect URIs.")
+    #     return redirect('/')
+    red_uri_str = get_reduri(request)
     oauth = OAuth2Session(
         os.getenv("CLIENT_ID"),
         redirect_uri=os.getenv(red_uri_str),

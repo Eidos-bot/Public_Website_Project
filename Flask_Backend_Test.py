@@ -551,7 +551,7 @@ def remote_api():
     print(request.json)
     return {'status': 'OK'}
 
-@app.route('/download-accruals')
+@app.route('/download-submissions')
 @login_required
 def download_excel():
     try:

@@ -477,10 +477,10 @@ def allowed_file(filename):
 # @app.route('/')
 # def serve_home():
 #     return render_template('sign_in.html')
-@app.route('/main')
+@app.route('/accruals-prepaid')
 @login_required
 def serve_form():
-    print("Serving main page.")
+    print("Serving accruals-prepaid page.")
     return render_template('ap_upload_test.html', user_name=session.get('user_name'))
 
 @app.route('/')
@@ -489,7 +489,7 @@ def serve_main():
     user = current_user
     if not user:
         return redirect('/login')  # or some response
-    return redirect('/main')
+    return redirect('/accruals-prepaid')
 
 # @app.route('/favicon.ico')
 # def favicon():
@@ -577,7 +577,7 @@ def download_excel():
     except OperationalError as e:
         print(f"Houston we have a database error. Its likely that the network blocks anything inbound from port 5432.")
         flash("Database is not connected. Please try again later.", "info")
-        return redirect('/main')
+        return redirect('/accruals-prepaid')
 
 
 # make sure to have '/upload' in the action link. Without it, you get a 405 error from post requests.

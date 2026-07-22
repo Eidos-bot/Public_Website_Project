@@ -20,15 +20,12 @@ from datetime import date, timedelta
 import win32com.client as client
 import zipfile
 
-DATABASE_URL = (
-    "postgresql://eidos:L0SrVaedulB9tnFzkUoc2twhIbWVAGz9@"
-    "dpg-d1d0idfdiees73cbhvh0-a.ohio-postgres.render.com:5432/accrual_db"
-    "?sslmode=require"
-)
 
-engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=True)
+
 
 load_dotenv()
+
+engine = create_engine(os.getenv("DATABASE_URL"), pool_size=10, max_overflow=20, echo=True)
 app = Flask(__name__, template_folder=r'templates', static_folder=r'static')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 EIDOS_SECRET_KEY = os.getenv('EIDOS_SECRET')

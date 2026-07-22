@@ -134,7 +134,7 @@
     <br/><br/>
     <div id="formHolder" class="elementContainer">
         <form id="excelSplitterForm" action="/split" method="POST" enctype="multipart/form-data">
-            <div id="credit_card_sheet_info" class="row">
+            <div id="credit_card_sheet_info" class="row not-ready">
 
                 <label>Upload Excel<input id="excelFile" name="ExcelFile" type="file" required/></label>
                 <label>Split Excel By<input id="splitByColumn" name="SplitBy" type="text" required/></label>
@@ -142,7 +142,7 @@
                 <label>Target Folder<input id="targetFolder" name="TargetFolder" type="text" required/></label>
                 
             </div>
-            <button id="splitExcelButton" class="submitButton" type="submit"></button>
+            <button id="splitExcelButton" class="submitButton not-ready" type="submit"></button>
 
         </form>
         <form id="conversionFormElement" action="/card_convert" method="POST" enctype="multipart/form-data">

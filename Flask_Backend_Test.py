@@ -307,7 +307,12 @@ def add_security_headers(response):
                                                    "img-src 'self' https: data:; "
                                                    "script-src 'self' https:; "
                                                    "style-src 'self' https: 'unsafe-inline';"
-                                                   "frame-src 'self' blob: https://informer5.brooklaw.edu  https://*.journey2eidos.com https://*.eidos-tests.ngrok.app http://*.localhost;")
+                                                   "frame-src 'self' "
+                                                       "blob: "
+                                                       "https://informer5.brooklaw.edu "
+                                                       "https://*.journey2eidos.com "
+                                                       "https://*.eidos-tests.ngrok.app "
+                                                       "http://*.localhost;")
     response.headers['Referrer-Policy'] = 'same-origin'
     return response
 

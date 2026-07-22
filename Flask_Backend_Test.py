@@ -17,7 +17,7 @@ import openpyxl
 from sqlalchemy.exc import OperationalError
 import datetime
 from datetime import date, timedelta
-import win32com.client as client
+# import win32com.client as client
 import zipfile
 
 
@@ -69,27 +69,27 @@ def get_reduri(request_val):
         flash("The url you're using doesn't match the valid redirect URIs.")
         return redirect('/')
 
-def excel_table_splitter(excel_file, split_by_column,folder_target, file_name):
-
-    excel_sheet = pandas.read_excel(excel_file)
-    excel_sheet.columns = excel_sheet.columns.str.replace('\n','')
-    print(excel_sheet.columns)
-
-    unique_ind = excel_sheet[split_by_column].unique()
-
-
-    def process_person(person):
-
-
-        individual_df = excel_sheet[excel_sheet[split_by_column] == person]
-        print(individual_df)
-        individual_df.reset_index(drop=True)
-        new_excel_path = fr"{folder_target}\{person} {file_name}.xlsx"
-        individual_df.to_excel(new_excel_path, index=False)
-        generate_statement_email(person,new_excel_path)
-
-    for ind in unique_ind:
-        process_person(ind)
+# def excel_table_splitter(excel_file, split_by_column,folder_target, file_name):
+#
+#     excel_sheet = pandas.read_excel(excel_file)
+#     excel_sheet.columns = excel_sheet.columns.str.replace('\n','')
+#     print(excel_sheet.columns)
+#
+#     unique_ind = excel_sheet[split_by_column].unique()
+#
+#
+#     def process_person(person):
+#
+#
+#         individual_df = excel_sheet[excel_sheet[split_by_column] == person]
+#         print(individual_df)
+#         individual_df.reset_index(drop=True)
+#         new_excel_path = fr"{folder_target}\{person} {file_name}.xlsx"
+#         individual_df.to_excel(new_excel_path, index=False)
+#         generate_statement_email(person,new_excel_path)
+#
+#     for ind in unique_ind:
+#         process_person(ind)
 
 
 def pandafy(excel_doc, card_type, voucher_id, ije_id, exclude_mgl=False,exclude_mr=False):
@@ -224,67 +224,67 @@ def make_je_files(target_df, completed_directory=r"T:\Accounts Payable\AP WORKIN
     return ije_package
     # print(upload_dataframe)
 
-def generate_statement_email(person_name, excel_attachment):
-    seven_days_from_today = date.today() + timedelta(days=7)
-
-    outlook = client.Dispatch('Outlook.Application')
-    message = outlook.CreateItem(0)
-    # message.Display()
-
-    statement_type = "STATEMENT TYPE"
-    message.To = "Place Holder"
-    message.CC = "accounts.payable@brooklaw.edu"
-    message.Subject = f"{person_name} {statement_type}"
-    lost_or_missing_file = r"documents/Lost or Missing Receipt Form.docx"
-    message.Attachments.Add(lost_or_missing_file)
-    message.Attachments.Add(excel_attachment)
-
-    message_test = f"""
-    Hi {person_name}, <br> 
-    <br>
-    Please review your {statement_type} activity and update the coding in column I of the excel sheet.
-    After updating, save the Excel file as "Approved" and forward this email back to me with the updated excel file and the receipts to validate the purchases.
-    If a receipt is missing, please complete the attached form.<br>
-    <br>
-    Should you have any questions, please don't hesitate to ask.<br>
-    <br>
-    Please complete it by {seven_days_from_today.strftime("%B %d, %Y")}. 
-    """
-
-    image_path = r"documents\bls_img.png"
-    attachment = message.Attachments.Add(image_path)
-    # Remember it was working with http, I just changed to https without testing because
-    # the warning was annoying me.
-    attachment.PropertyAccessor.SetProperty(
-        "https://schemas.microsoft.com/mapi/proptag/0x3712001F",
-        "logo_cid"
-    )
-
-    message.HTMLbody = f"""<!DOCTYPE html>
-
-    <p>{message_test}</p>
-
-    <p>
-
-
-
-        <br>
-        <br>
-        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Best Regards,</span> <br>
-        <br>
-        <span> <b style='font-size:10.0pt;font-family:"Times New Roman",serif'>Erina Pae </b> </span> <br>
-
-        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Accounts Payable & Procurement Manager </span> <br>
-
-        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Brooklyn Law School </span> <br>
-
-        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>(718)-780-0305 </span> <br>
-
-        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'><a href="mailto:accounts.payable@brooklaw.edu">accounts.payable@brooklaw.edu</a></span> <br>
-        <img src="cid:logo_cid" width="190">
-    </p>"""
-
-    message.Save()
+# def generate_statement_email(person_name, excel_attachment):
+#     seven_days_from_today = date.today() + timedelta(days=7)
+#
+#     outlook = client.Dispatch('Outlook.Application')
+#     message = outlook.CreateItem(0)
+#     # message.Display()
+#
+#     statement_type = "STATEMENT TYPE"
+#     message.To = "Place Holder"
+#     message.CC = "accounts.payable@brooklaw.edu"
+#     message.Subject = f"{person_name} {statement_type}"
+#     lost_or_missing_file = r"documents/Lost or Missing Receipt Form.docx"
+#     message.Attachments.Add(lost_or_missing_file)
+#     message.Attachments.Add(excel_attachment)
+#
+#     message_test = f"""
+#     Hi {person_name}, <br>
+#     <br>
+#     Please review your {statement_type} activity and update the coding in column I of the excel sheet.
+#     After updating, save the Excel file as "Approved" and forward this email back to me with the updated excel file and the receipts to validate the purchases.
+#     If a receipt is missing, please complete the attached form.<br>
+#     <br>
+#     Should you have any questions, please don't hesitate to ask.<br>
+#     <br>
+#     Please complete it by {seven_days_from_today.strftime("%B %d, %Y")}.
+#     """
+#
+#     image_path = r"documents\bls_img.png"
+#     attachment = message.Attachments.Add(image_path)
+#     # Remember it was working with http, I just changed to https without testing because
+#     # the warning was annoying me.
+#     attachment.PropertyAccessor.SetProperty(
+#         "https://schemas.microsoft.com/mapi/proptag/0x3712001F",
+#         "logo_cid"
+#     )
+#
+#     message.HTMLbody = f"""<!DOCTYPE html>
+#
+#     <p>{message_test}</p>
+#
+#     <p>
+#
+#
+#
+#         <br>
+#         <br>
+#         <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Best Regards,</span> <br>
+#         <br>
+#         <span> <b style='font-size:10.0pt;font-family:"Times New Roman",serif'>Erina Pae </b> </span> <br>
+#
+#         <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Accounts Payable & Procurement Manager </span> <br>
+#
+#         <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Brooklyn Law School </span> <br>
+#
+#         <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>(718)-780-0305 </span> <br>
+#
+#         <span style='font-size:10.0pt;font-family:"Times New Roman",serif'><a href="mailto:accounts.payable@brooklaw.edu">accounts.payable@brooklaw.edu</a></span> <br>
+#         <img src="cid:logo_cid" width="190">
+#     </p>"""
+#
+#     message.Save()
 
 
 def proj_id_helper(gl_info_list):
@@ -519,7 +519,8 @@ def split():
     # Make a variable that gets a choice element like dropdown and do an if. if card prep for td and amex, table splitter.
     # if chase oand other card ije generation,pandafy.
 
-    excel_table_splitter(excel_file=excel_targ, split_by_column=split_col, folder_target=folder_targ, file_name=file_name_targ)
+    # excel_table_splitter(excel_file=excel_targ, split_by_column=split_col, folder_target=folder_targ, file_name=file_name_targ)
+    print("Sorry temporarily down....Render is Linux only.")
     return redirect('/credit-card-prep')
 
 @app.route("/card_convert", methods=["POST"])

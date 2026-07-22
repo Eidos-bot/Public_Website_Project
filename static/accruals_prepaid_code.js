@@ -73,7 +73,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 let prePaidFACheck = nl['prepaid'][0].checked
                 let glFACheck = nl['gl'][0].value
                 let projidFAChecker = nl['project_id'][0].value
-
+                console.log(`${prePaidFACheck}`)
+                console.log(`${glFACheck}`)
+                console.log(`${projidFAChecker}`)
                 if (!(prePaidFACheck === true || (projidFAChecker !== "" && glFACheck.startsWith("4")))) {
                     allValid = true
                     console.log("Asset check evaluates to false")

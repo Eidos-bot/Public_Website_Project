@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <head>
+    <meta charset="UTF-8">
+    <title>Credit Card Prep</title>
+        <style>
+            body {
+                font-family: 'Times New Roman', serif;
+                background-color: #ffffff;
+                margin: 0;
+
+
+
+            }
+
+            header {
+            background-color: #630e0e;
+            color: #ffffff;
+            padding-block: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            position: fixed;
+            width: 100%;
+            border:1px solid #000000;
+            padding-left: 10px;
+        }
+            .header_links {
+            display: flex;
+            flex-direction:row;
+            width:100%;
+            column-gap: 20px;
+
+        }
+
+            h1 {
+                color:#ffffff;
+                font-size: 12px
+            }
+            form {
+
+
+                display: flex;
+                flex-direction: column;
+                border-radius: 18px;
+                background-color: #630e0e;
+                margin:25px;
+                padding: 65px;
+                width: 850px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                color: white;
+                height:300px;
+                box-sizing:border-box;
+                align-items:center;
+            }
+            .row {
+                display:flex;
+                flex-direction:row;
+
+            }
+            #formHolder {
+                display: flex;
+                flex-direction: column;
+                padding: 100px 0;
+                align-items:center;
+            }
+            .submitButton {
+                height:20px;
+                width:30px;
+            }
+        </style>
+    </head>
+<body>
+
+    <header>
+
+        Brooklyn Law School - Credit Card Prep
+
+    <h1>Coding since 2020</h1>
+    <div class="header_links">
+
+    <a href="/" style="
+     font-weight: bold;
+     color: #f8f8f8;
+     text-decoration: none;
+     font-size: 16px;
+
+   ">Home Screen</a>
+
+    <a href="/voucher-lookup" style="
+     font-weight: bold;
+     color: #f8f8f8;
+     text-decoration: none;
+     font-size: 16px;
+
+   ">Voucher Lookup</a>
+
+    <a href="/generate-ckse"
+   style="
+     font-weight: bold;
+     color: #f8f8f8;
+     text-decoration: none;
+     font-size: 16px;
+
+   ">
+  Generate CKSE
+    </a>
+
+    <a href="/accruals-prepaid" style="
+     font-weight: bold;
+     color: #f8f8f8;
+     text-decoration: none;
+     font-size: 16px;
+
+   ">Accruals & Prepaid</a>
+    </div>
+
+
+
+    </header>
+    <br/><br/>
+    <div id="formHolder" class="elementContainer">
+        <form id="excelSplitterForm" action="/split" method="POST" enctype="multipart/form-data">
+            <div id="credit_card_sheet_info" class="row">
+
+                <label>Upload Excel<input id="excelFile" name="ExcelFile" type="file" required/></label>
+                <label>Split Excel By<input id="splitByColumn" name="SplitBy" type="text" required/></label>
+                <label>New File Name<input id="newFileName" name="NewFileName" type="text" required/></label>
+                <label>Target Folder<input id="targetFolder" name="TargetFolder" type="text" required/></label>
+                
+            </div>
+            <button id="splitExcelButton" class="submitButton" type="submit"></button>
+
+        </form>
+        <form id="conversionFormElement" action="/card_convert" method="POST" enctype="multipart/form-data">
+            <div id="creditCardConversionInfo" class="row">
+                <label>Upload Excel<input id="excelFileConversion" name="ExcelFileConvert" type="file" required/></label>
+                <label> Credit Card Type
+                    <select id="cardTypeElement" name="cardType" required>
+    
+                        <option disabled selected value> -- Select Card Type -- </option>
+                        <option value="CHASE">CHASE</option>
+                        <option value="TD">TD (NOT READY YET!)</option>
+                        <option value="AMEX">AMEX (NOT READY YET!)</option>
+                    
+                    </select>    
+                </label>
+                <label>Card Voucher Number<input id="cardVoucherNumberElement" name="cardVoucherNumber" type="text" required/></label>
+                <label>Import Journal Entry #<input id="ijeNumberElement" name="ijeNumber" type="text" required/></label>
+            </div>
+            <button id="convertExcelButton" class="submitButton" type="submit"></button>
+        </form>
+    </div>
+
+</body>
+
+</html>

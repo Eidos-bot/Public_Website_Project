@@ -15,6 +15,10 @@ from Password_Creation_Simple_Test import create_password
 from sqlalchemy import create_engine, text
 import openpyxl
 from sqlalchemy.exc import OperationalError
+import datetime
+from datetime import date, timedelta
+import win32com.client as client
+import zipfile
 
 DATABASE_URL = (
     "postgresql://eidos:L0SrVaedulB9tnFzkUoc2twhIbWVAGz9@"
@@ -67,6 +71,248 @@ def get_reduri(request_val):
         print(f"{request_val.host_url} is the base url.")
         flash("The url you're using doesn't match the valid redirect URIs.")
         return redirect('/')
+
+def excel_table_splitter(excel_file, split_by_column,folder_target, file_name):
+
+    excel_sheet = pandas.read_excel(excel_file)
+    excel_sheet.columns = excel_sheet.columns.str.replace('\n','')
+    print(excel_sheet.columns)
+
+    unique_ind = excel_sheet[split_by_column].unique()
+
+
+    def process_person(person):
+
+
+        individual_df = excel_sheet[excel_sheet[split_by_column] == person]
+        print(individual_df)
+        individual_df.reset_index(drop=True)
+        new_excel_path = fr"{folder_target}\{person} {file_name}.xlsx"
+        individual_df.to_excel(new_excel_path, index=False)
+        generate_statement_email(person,new_excel_path)
+
+    for ind in unique_ind:
+        process_person(ind)
+
+
+def pandafy(excel_doc, card_type, voucher_id, ije_id, exclude_mgl=False,exclude_mr=False):
+    try:
+        df = pandas.read_excel(excel_doc)
+        print("Reading csv.")
+    except ValueError:
+        df = pandas.read_csv(excel_doc)
+    review_df = pandas.DataFrame()
+    try:
+        coar_csv_df = pandas.read_csv(r"CHARTOFACCTS.csv")
+    except FileNotFoundError:
+        coar_csv_df = pandas.DataFrame({'GL Account': ['0-0-0000-0000']})
+    posting_date = "06/21/1996"
+    period=""
+    if card_type == 'CHASE':
+        print(df.keys())
+        chase_df_keys = list(df.keys())
+        valid_gl_cols = chase_df_keys[chase_df_keys.index('Notes')+1:chase_df_keys.index('User Department')]
+        df["Name"] = df["First Name"] + " " + df["Last Name"]
+        # df["Final Gl"] = df[valid_gl_cols].bfill(axis=1).iloc[:, 0]
+        gl_items = df[valid_gl_cols].apply(lambda row: row.dropna().tolist(), axis=1)
+
+        df["Final Gl"] = ["NOT SELECTED" if not x else str(x[0]).split(' ')[0] for x in gl_items]
+        df["Final ProjID"] = ["" if not x else proj_id_helper(x) for x in gl_items]
+
+        df["Amount"] = (
+            df["Amount"]
+            .astype(str).str.replace("$", "", regex=False)
+            .astype(str).str.replace(",", "", regex=False)
+            .astype(str).str.replace("(", "-", regex=False)
+            .astype(str).str.replace(")", "", regex=False)
+        )
+        print(df)
+        df["Amount"] = pandas.to_numeric(df["Amount"])
+        print(df["Amount"])
+        df["Debit"] = [abs(x) if x<0 else "" for x in df["Amount"]]
+        df["Credit"] = [x if x>0 else "" for x in df["Amount"]]
+        df["Gl Check"] = ["True" if x in coar_csv_df['GL Account'].to_list() else "False" for x in df["Final Gl"]]
+        posting_date = str((
+                pandas.to_datetime(df["Authorized At (UTC)"])[0]
+                + pandas.offsets.MonthEnd(0)).strftime("%m/%d/%Y"))
+
+        print(posting_date)
+        period = datetime.datetime.strptime(posting_date,"%m/%d/%Y").strftime("%B %Y")
+        # df["Date"] = df['Authorized At (UTC)'].astype(str).str.split(" ")[0]
+        # print(df["Final Gl"])
+        df['Date'] = pandas.to_datetime(df["Authorized At (UTC)"]).dt.strftime("%m/%d/%Y")
+        review_df = df[['Name', 'Merchant','Debit','Credit', 'Receipt?', 'Date', 'Final Gl', 'Final ProjID','Gl Check', 'Notes']].copy()
+        if exclude_mgl and not exclude_mr:
+            review_df = review_df.loc[review_df['Final Gl'] != "nan"]
+        elif exclude_mr and not exclude_mgl:
+            review_df = review_df.loc[review_df['Receipt?'] == "Y"]
+        elif exclude_mr and exclude_mgl:
+            review_df = review_df.loc[review_df['Final Gl'] != "nan"]
+            review_df = review_df.loc[review_df['Receipt?'] == "Y"]
+
+        df["Debit"] = pandas.to_numeric(df["Debit"], errors="coerce")
+        df["Credit"] = pandas.to_numeric(df["Credit"], errors="coerce")
+        total = (df["Debit"].sum() - df["Credit"].sum()).round(2)
+        print("Total is:", total)
+        review_df.loc[len(review_df)] = ['Payment', period,'',total,"N/A", posting_date, '1-0-4378-5600', '', 'TRUE','Our JPM payment']
+
+        # Let's try just returning a "proper" dataframe html table.
+        # review_df.to_csv(os.path.join(completed_directory,f"{period} {card_type} Review Excel.csv"), index=False)
+    print(review_df)
+    return review_df, card_type, period, voucher_id, ije_id
+    # Each review df should have the sam format.
+
+def make_je_files(target_df, completed_directory=r"T:\Accounts Payable\AP WORKING FOLDER\AP Invoices\11 May 2026\Chris\Credit Card Auto Attempt"):
+    review_df, card_type, period, voucher_id, ije_id = target_df
+    posting_date = review_df['Date'].to_list()[-1]
+    month_of_charge = posting_date.split("/")[0]
+    print(f"Month of charge: {month_of_charge}")
+    date_value = posting_date.replace("/", "")[:4] + posting_date[-2:]
+    size_of_review = len(review_df)
+
+    je_list = ["JE" for _ in range(size_of_review)]
+    gl_list_column = ["NEED GL" if x=="nan" else x.replace("-","") for x in review_df["Final Gl"]]
+    prj_id_column = ["" if not x else x for x in review_df["Final ProjID"]]
+    debit_amounts_column = ["" if not x else int(round((x*100))) for x in review_df["Debit"]]
+    credit_amounts_column = ["" if not x else int(round((x*100))) for x in review_df["Credit"]]
+    description_column = [month_of_charge+card_type+"-"+voucher_id+"-"+x for x in review_df['Merchant'].to_list()]
+    ije_id_column = [ije_id for _ in range(size_of_review)]
+    date_column = [str(date_value) for _ in range(size_of_review)]
+
+    print(len(je_list))
+    print(len(gl_list_column))
+    print(len(prj_id_column))
+    print(len(debit_amounts_column))
+    print(len(credit_amounts_column))
+    print(len(description_column))
+    print(len(ije_id_column))
+    print(len(date_column))
+
+    rcc_excel_file_name = f"{period} {card_type} Review Excel.csv"
+    r_card_output = BytesIO()
+
+    # After the html is corrected, it converts back to a dataframe with the new values and comes here for file creation.
+
+    review_df.to_csv(r_card_output, index=False)
+    r_card_output.seek(0)
+    review_excel = r_card_output.read()
+    upload_dataframe = pandas.DataFrame({'JE Column':je_list, 'GL Column':gl_list_column,
+                                     'Debits':debit_amounts_column, 'Credits':credit_amounts_column,
+                                     'Description':description_column, 'IJE ID':ije_id_column, 'Post Date':date_column, 'Empty1':'','Empty2':'', 'ProjID':prj_id_column, })
+    cc_excel_file_name = f"{period} {card_type} Final.xlsx"
+    f_card_output = BytesIO()
+    with pandas.ExcelWriter(f_card_output, engine='xlsxwriter') as writer:
+        upload_dataframe.to_excel(writer,sheet_name='Upload File',header=False, index=False)
+        worksheet = writer.sheets['Upload File']
+        worksheet.set_column('A:A', 2)
+        worksheet.set_column('B:B', 10)
+        worksheet.set_column('C:C', 13)
+        worksheet.set_column('D:D', 13)
+        worksheet.set_column('E:E', 30)
+        worksheet.set_column('F:F', 10)
+        worksheet.set_column('G:G', 8)
+        worksheet.set_column('H:H', 7)
+        worksheet.set_column('I:I', 5)
+        worksheet.set_column('J:J', 15)
+        print("Closing Final excel")
+
+    f_card_output.seek(0)
+    final_excel = f_card_output.read()
+    ije_package = BytesIO()
+    with zipfile.ZipFile(ije_package, mode='w',compression=zipfile.ZIP_STORED) as z:
+        z.writestr(cc_excel_file_name,final_excel)
+        z.writestr(rcc_excel_file_name,review_excel)
+    ije_package.seek(0)
+    # ije_zip = ije_package.read(0)
+    return ije_package
+    # print(upload_dataframe)
+
+def generate_statement_email(person_name, excel_attachment):
+    seven_days_from_today = date.today() + timedelta(days=7)
+
+    outlook = client.Dispatch('Outlook.Application')
+    message = outlook.CreateItem(0)
+    # message.Display()
+
+    statement_type = "STATEMENT TYPE"
+    message.To = "Place Holder"
+    message.CC = "accounts.payable@brooklaw.edu"
+    message.Subject = f"{person_name} {statement_type}"
+    lost_or_missing_file = r"documents/Lost or Missing Receipt Form.docx"
+    message.Attachments.Add(lost_or_missing_file)
+    message.Attachments.Add(excel_attachment)
+
+    message_test = f"""
+    Hi {person_name}, <br> 
+    <br>
+    Please review your {statement_type} activity and update the coding in column I of the excel sheet.
+    After updating, save the Excel file as "Approved" and forward this email back to me with the updated excel file and the receipts to validate the purchases.
+    If a receipt is missing, please complete the attached form.<br>
+    <br>
+    Should you have any questions, please don't hesitate to ask.<br>
+    <br>
+    Please complete it by {seven_days_from_today.strftime("%B %d, %Y")}. 
+    """
+
+    image_path = r"documents\bls_img.png"
+    attachment = message.Attachments.Add(image_path)
+    # Remember it was working with http, I just changed to https without testing because
+    # the warning was annoying me.
+    attachment.PropertyAccessor.SetProperty(
+        "https://schemas.microsoft.com/mapi/proptag/0x3712001F",
+        "logo_cid"
+    )
+
+    message.HTMLbody = f"""<!DOCTYPE html>
+
+    <p>{message_test}</p>
+
+    <p>
+
+
+
+        <br>
+        <br>
+        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Best Regards,</span> <br>
+        <br>
+        <span> <b style='font-size:10.0pt;font-family:"Times New Roman",serif'>Erina Pae </b> </span> <br>
+
+        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Accounts Payable & Procurement Manager </span> <br>
+
+        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>Brooklyn Law School </span> <br>
+
+        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'>(718)-780-0305 </span> <br>
+
+        <span style='font-size:10.0pt;font-family:"Times New Roman",serif'><a href="mailto:accounts.payable@brooklaw.edu">accounts.payable@brooklaw.edu</a></span> <br>
+        <img src="cid:logo_cid" width="190">
+    </p>"""
+
+    message.Save()
+
+
+def proj_id_helper(gl_info_list):
+    try:
+        if len(gl_info_list[1]) > 15:
+            prj_id = None
+        else:
+            prj_id = gl_info_list[1]
+    except IndexError:
+        prj_id = None
+    return prj_id
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['Content-Security-Policy'] = ("default-src 'self' https:; "
+                                                   "font-src 'self' https: data:; "
+                                                   "img-src 'self' https: data:; "
+                                                   "script-src 'self' https:; "
+                                                   "style-src 'self' https: 'unsafe-inline';"
+                                                   "frame-src 'self' https://informer5.brooklaw.edu;")
+    response.headers['Referrer-Policy'] = 'same-origin'
+    return response
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -259,6 +505,43 @@ def other_projects():
     return render_template('ProjectsPage.html')
 
 qualified_users = ["Christopher Dessources", "Jeffrey Dulow", "admin"]
+
+@app.route("/credit-card-prep")
+@login_required
+def credit_card_prep():
+    return render_template('credit_card_prepper.html')
+
+@app.route("/split", methods=["POST"])
+@login_required
+def split():
+    excel_targ = request.files.get("ExcelFile")
+    print(excel_targ)
+    split_col = request.form.get("SplitBy")
+    folder_targ = request.form.get("TargetFolder")
+    file_name_targ = request.form.get("NewFileName")
+    # Make a variable that gets a choice element like dropdown and do an if. if card prep for td and amex, table splitter.
+    # if chase oand other card ije generation,pandafy.
+
+    excel_table_splitter(excel_file=excel_targ, split_by_column=split_col, folder_target=folder_targ, file_name=file_name_targ)
+    return redirect('/credit-card-prep')
+
+@app.route("/card_convert", methods=["POST"])
+@login_required
+def card_data_conversion():
+    excel_targ = request.files.get("ExcelFileConvert")
+    print(excel_targ)
+    card_type = request.form.get("cardType")
+    card_payment_voucher = request.form.get("cardVoucherNumber")
+    ije_number = request.form.get("ijeNumber")
+    ije_zip_bytes = make_je_files(pandafy(
+            excel_targ,
+            voucher_id=card_payment_voucher, ije_id=ije_number, card_type=card_type, exclude_mgl=False,
+            exclude_mr=False))
+    return send_file(
+        ije_zip_bytes,
+        as_attachment=True,
+        download_name='IJE_FILES_PACKAGE.zip'
+    )
 
 @app.route('/remote-api', methods=['POST', 'GET'])
 def remote_api():

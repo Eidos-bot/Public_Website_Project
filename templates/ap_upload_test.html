@@ -1,15 +1,13 @@
+<!DOCTYPE html>
 <html lang="en">
-
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
-<head>
-
-    <title>Brooklyn Law School - AP Testing</title>
-
-    <style>
+    <head>
+    <meta charset="UTF-8">
+    <title>Accrual & Pre Paid</title>
+        <style>
 
         body {
-            font-family: 'Georgia', serif;
+            font-family: 'Times New Roman', serif;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
@@ -18,50 +16,33 @@
         header {
             background-color: #630e0e;
             color: #ffffff;
-            padding: 20px 40px;
+            padding-block: 20px;
             font-size: 24px;
             font-weight: 700;
             position: fixed;
             width: 100%;
             border:1px solid #000000;
-
-
-
-
-        }
-        footer {
-            background-color: #630e0e;
-            color: #ffffff;
-            border:1px solid #000000;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: fit-content;
-            display:flex;
-            flex-direction:row;
-            gap:20px;
+            z-index:1;
+            padding-left: 10px;
         }
 
         h1 {
             color:#ffffff;
             font-size: 12px;
-            border-bottom: 2px solid black;
+
         }
 
         .header_links {
             display: flex;
             flex-direction:row;
             width:100%;
-            gap: 30px;
-            align-items: flex-start;
-            padding-right: 20px;
+            column-gap: 20px;
+
         }
 
         .nonGLRelatedSection{
-            max-width: 100%;
+            width: fit-content;
             height: 700px;
-            margin-top: 50px;
             background: #630e0e;
             padding: 30px;
             border-radius: 18px;
@@ -94,8 +75,8 @@
              margin-left: 190px;
              margin-top:-700px;
 
-             width: 70%;
-             max-width: 600px;
+             width: 450px;
+
              height: 500px;
              border: 1px solid #ffffff;
              overflow:scroll;
@@ -103,19 +84,19 @@
          }
          form{
              display:flex;
-             justify-content:center;
-             align-items: flex-start;
+             width:fit-content;
 
-             padding:40px 10px;
 
-             width:1900px;
+             /*padding:40px 10px;*/
+
+
 
 
 
          }
-         .flash-messages{
-             {#margin-top:60px;#}
-         }
+         /*.flash-messages{*/
+         /*    {#margin-top:60px;#}*/
+         /*}*/
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -128,7 +109,7 @@
 /*       } */
          .sidebar{
              padding:30px;
-             margin-top: 50px;
+
              width:fit-content;
              border:1px solid #000000;
 
@@ -172,7 +153,9 @@
          }
          .submitter_objs {
              margin-top:20px;
+             margin-bottom:20px;
              display: flex;
+             width:fit-content;
          }
 
          #prepaidLabel{
@@ -183,199 +166,208 @@
 
          }
 
-
+        #pageContainer{
+            padding-top:150px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+        }
          .child sub {
              flex:0;
          }
 
     </style>
-</head>
-
-<!--Use '.' for classes, '#' for ids and nothing for tags.-->
+    </head>
 <body>
 
     <header>
 
-        Brooklyn Law School - AP Testing
+        Brooklyn Law School - Accruals & Prepaid
 
     <h1>Coding since 2020</h1>
     <div class="header_links">
-    <a href="/other-projects" style=" font-weight: bold; color: #f8f8f8; font-size: 16px;">Other Projects</a>
 
-    <a href="/download-accruals"
+    <a href="/" style="
+     font-weight: bold;
+     color: #f8f8f8;
+     text-decoration: none;
+     font-size: 16px;
+
+   ">Home Screen</a>
+
+    <a href="/voucher-lookup" style="
+     font-weight: bold;
+     color: #f8f8f8;
+     text-decoration: none;
+     font-size: 16px;
+     /*margin: 1px 20px;*/
+   ">Voucher Lookup</a>
+
+    <a href="/generate-ckse"
    style="
      font-weight: bold;
      color: #f8f8f8;
      text-decoration: none;
      font-size: 16px;
+
    ">
-  Download Submitted Accruals List
+  Generate CKSE
     </a>
-    <a href="/logout" style=" font-weight: bold; color: #f8f8f8; font-size: 16px;">Logout</a>
+
+  <a href="/credit-card-prep" style="
+    font-weight: bold;
+    color: #f8f8f8;
+    text-decoration: none;
+    font-size: 16px;
+    /*margin: 20px 20px;*/
+    ">Credit Card Prep</a>
+
+  <a href="/download-submissions" style="
+    font-weight: bold;
+    color: #f8f8f8;
+    text-decoration: none;
+    font-size: 16px;
+    margin-left:auto;
+    margin-right:20px;
+">Download Submissions</a>
+
     </div>
+
+
 
     </header>
 
+    <div id="pageContainer">
+        <form id ="myForm" action="/upload" method="post" enctype="multipart/form-data">
 
-    <div style="color:red;">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div style="color: red;">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
+            <div id="sidebarContainer" class="sidebar">
 
-    <!--Or use localhost instead of the ip for action if using local network. Will look for home ip to test there. and with full domain, it seems to not need the full path.-->
+                <button id="newGlButton" type="button">New GL</button>
 
-    <form id ="myForm" action="/upload" method="post" enctype="multipart/form-data">
+                <div id="glGroup" class='parent gl-parent' >
 
-        <div id="sidebarContainer" class="sidebar">
+                    <div class='child gl-child'><label>GL Code<input minlength="10" maxlength="10" id="GL" name="GL" type="text" pattern="[0-9]{10}" title="Enter 10 digit GL Code" required/></label></div>
+                    <div class='child gl-child'><label>Project ID<input id="ProjectID" name="Project ID" type="text"/></label></div>
+                    <div class="projectIdClass" id="projIdClassId">
 
-            <button id="newGlButton" type="button">New GL</button>
+    <!--                    I wanted to make it so the button was row aligned to the right of the project id input. But bottom right.-->
 
-            <div id="glGroup" class='parent gl-parent' >
+                        <div class='child gl-child'><label >Amount<input id="amt" name="Amount" step="0.01" type="number" required/></label></div>
+                        <div class='child gl-child' id="removeGlClass"><button id="removeGroup" type="button">-</button></div>
 
-                <div class='child gl-child'><label>GL Code<input minlength="10" maxlength="10" id="GL" name="GL" type="text" pattern="[0-9]{10}" title="Enter 10 digit GL Code" required/></label></div>
-                <div class='child gl-child'><label>Project ID<input id="ProjectID" name="Project ID" type="text"/></label></div>
-                <div class="projectIdClass" id="projIdClassId">
+    <!-- Until I'm told otherwise, the best way to keep styles on unique cloned elements is to put the style within the element. -->
 
-<!--                    I wanted to make it so the button was row aligned to the right of the project id input. But bottom right.-->
+                        <div id="prepaidGroup" class="child gl-child" style="margin-top:15px;display:flex;flex-direction: row;border:1px solid #000000;border-radius: 3px;width:fit-content;height:fit-content;">
+                            <div class='child gl-child' id ="prepaidCheckBox"><label style="margin-top: 0; padding-top: 0;">PreP<input id="pre_paid" name="Prepaid" type="checkbox"/></label></div>
+                            <div class="hiddenPrePaidDetails" id="hiddenPrePaidDetailsId">
+                                <input type="hidden" name="prepaidPeriod" value="None">
+                                <input type="hidden" name="Days/Months/Years" value="None">
+                                <input type="hidden" name="Fiscal Year" value="None">
+                            </div>
+    <!--                     This will get added or disabled to the prepaid group -->
 
-                    <div class='child gl-child'><label >Amount<input id="amt" name="Amount" step="0.01" type="number" required/></label></div>
-                    <div class='child gl-child' id="removeGlClass"><button id="removeGroup" type="button">-</button></div>
 
-<!-- Until I'm told otherwise, the best way to keep styles on unique cloned elements is to put the style within the element. -->
 
-                    <div id="prepaidGroup" class="child gl-child" style="margin-top:15px;display:flex;flex-direction: row;border:1px solid #000000;border-radius: 3px;width:fit-content;height:fit-content;">
-                        <div class='child gl-child' id ="prepaidCheckBox"><label style="margin-top: 0; padding-top: 0;">PreP<input id="pre_paid" name="Prepaid" type="checkbox"/></label></div>
-                        <div class="hiddenPrePaidDetails" id="hiddenPrePaidDetailsId">
-                            <input type="hidden" name="prepaidPeriod" value="None">
-                            <input type="hidden" name="Days/Months/Years" value="None">
-                            <input type="hidden" name="Fiscal Year" value="None">
                         </div>
-<!--                     This will get added or disabled to the prepaid group -->
-
-
-
                     </div>
+
                 </div>
 
             </div>
 
-        </div>
-
-        <div class="nonGLRelatedSection">
+            <div class="nonGLRelatedSection">
 
 
-            <label>Upload File<input id="file" name="file" type="file" accept=".pdf"/></label>
-
-            <br /><br />
-
-            <label>Vendor<input id="ven" name="Vendor" type="text" required/></label>
-
-            <br /><br />
-
-            <label>Invoice Number<input id="invnum" name="Invoice Number" type="text"/></label>
-
-            <br /><br />
-
-            <label>Description<input id="desc" name="Description" type="text" required/></label>
-
-            <br /><br />
-
-            <label>GL Amount Total<input id="glAmountTotal" name="Gl Amount Total" value="0" step="0.01" type="number" style="font-weight: bold;" readonly/></label>
-
-            <br /><br />
-
-            <label>Invoice Date<input id="invdt" name="Invoice Date" type="date" required/></label>
-
-
-            <div class="status_checks">
-
-                <label for="est_chk">Est</label>
-                <input id="est_chk" name="Estimate Check" type="checkbox"/>
-
-                <label for="asset_chk">Fixed Asset</label>
-                <input id="asset_chk" name="Asset Check" type="checkbox"/>
-
-            </div>
-
-            <br /><br />
-
-            <div class="submitter_objs">
-
-                <div class="child sub"><label>Submitter<input id="submitter" name="Submitter" type="text" value="{{ user_name }}" readonly/></label><button type="submit" id="submit_button" >Upload</button></div>
-
-<!--                Remember to add approver section and align it probably-->
-
+                <label>Upload File<input id="file" name="file" type="file" accept=".pdf"/></label>
 
                 <br /><br />
 
-                <div class="child sub">
+                <label>Vendor<input id="ven" name="Vendor" type="text" required/></label>
 
-                    <label> Department
+                <br /><br />
 
-                        <select id="dept" name="Department" required>
+                <label>Invoice Number<input id="invnum" name="Invoice Number" type="text"/></label>
 
-                        <option disabled selected value> -- Select Department -- </option>
+                <br /><br />
 
-                        <option value="ACADEMIC & STUDENT SUCCESS">ACADEMIC & STUDENT SUCCESS</option>
-                        <option value="ADMISSIONS">ADMISSIONS</option>
-                        <option value="DEVELOPMENT">DEVELOPMENT</option>
-                        <option value="EXTERNAL AFFAIRS">EXTERNAL AFFAIRS</option>
-                        <option value="EVENTS">EVENTS</option>
-                        <option value="CAREER CENTER">CAREER CENTER</option>
-                        <option value="CLINICS">CLINICS</option>
-                        <option value="DEANS' OFFICE">DEANS' OFFICE</option>
-                        <option value="FACILITIES">FACILITIES</option>
-                        <option value="FACULTY">FACULTY</option>
-                        <option value="FINANCE">FINANCE</option>
-                        <option value="FINANCIAL AID">FINANCIAL AID</option>
-                        <option value="GENERAL COUNSEL">GENERAL COUNSEL</option>
-                        <option value="HUMAN RESOURCES">HUMAN RESOURCES</option>
-                        <option value="INFORMATION TECHNOLOGY">INFORMATION TECHNOLOGY</option>
-                        <option value="INTERNATIONAL PROGRAMS">INTERNATIONAL PROGRAMS</option>
-                        <option value="LEGAL WRITING FACULTY">LEGAL WRITING FACULTY</option>
-                        <option value="LIBRARY">LIBRARY</option>
-                        <option value="PUBLIC SERVICE">PUBLIC SERVICE</option>
-                        <option value="REGISTRAR">REGISTRAR</option>
-                        <option value="STUDENT AFFAIRS">STUDENT AFFAIRS</option>
-                        <option value="STUDENT BAR ASSOCIATION">STUDENT BAR ASSOCIATION</option>
+                <label>Description<input id="desc" name="Description" type="text" required/></label>
 
-                        </select>
+                <br /><br />
 
-                    </label>
+                <label>GL Amount Total<input id="glAmountTotal" name="Gl Amount Total" value="0" step="0.01" type="number" style="font-weight: bold;" readonly/></label>
+
+                <br /><br />
+
+                <label>Invoice Date<input id="invdt" name="Invoice Date" type="date" required/></label>
+
+
+                <div class="status_checks">
+
+                    <label for="est_chk">Est</label>
+                    <input id="est_chk" name="Estimate Check" type="checkbox"/>
+
+                    <label for="asset_chk">Fixed Asset</label>
+                    <input id="asset_chk" name="Asset Check" type="checkbox"/>
 
                 </div>
 
+                <div class="submitter_objs">
+
+                    <div class="child sub"><label>Submitter<input id="submitter" name="Submitter" type="text" required/></label><button type="submit" id="submit_button" >Upload</button></div>
+
+    <!--                Remember to add approver section and align it probably-->
+
+
+                    <br /><br />
+
+                    <div class="child sub">
+
+                        <label> Department
+
+                            <select id="dept" name="Department" required>
+
+                            <option disabled selected value> -- Select Department -- </option>
+
+                            <option value="ACADEMIC & STUDENT SUCCESS">ACADEMIC & STUDENT SUCCESS</option>
+                            <option value="ADMISSIONS">ADMISSIONS</option>
+                            <option value="DEVELOPMENT">DEVELOPMENT</option>
+                            <option value="EXTERNAL AFFAIRS">EXTERNAL AFFAIRS</option>
+                            <option value="EVENTS">EVENTS</option>
+                            <option value="CAREER CENTER">CAREER CENTER</option>
+                            <option value="CLINICS">CLINICS</option>
+                            <option value="DEANS' OFFICE">DEANS' OFFICE</option>
+                            <option value="FACILITIES">FACILITIES</option>
+                            <option value="FACULTY">FACULTY</option>
+                            <option value="FINANCE">FINANCE</option>
+                            <option value="FINANCIAL AID">FINANCIAL AID</option>
+                            <option value="GENERAL COUNSEL">GENERAL COUNSEL</option>
+                            <option value="HUMAN RESOURCES">HUMAN RESOURCES</option>
+                            <option value="INFORMATION TECHNOLOGY">INFORMATION TECHNOLOGY</option>
+                            <option value="INTERNATIONAL PROGRAMS">INTERNATIONAL PROGRAMS</option>
+                            <option value="LEGAL WRITING FACULTY">LEGAL WRITING FACULTY</option>
+                            <option value="LIBRARY">LIBRARY</option>
+                            <option value="PUBLIC SERVICE">PUBLIC SERVICE</option>
+                            <option value="REGISTRAR">REGISTRAR</option>
+                            <option value="STUDENT AFFAIRS">STUDENT AFFAIRS</option>
+                            <option value="STUDENT BAR ASSOCIATION">STUDENT BAR ASSOCIATION</option>
+
+                            </select>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <br /><br />
+
+
+                <div id="pdfPreview" style="width:700px;"></div>
+
             </div>
+        </form>
+    </div>
 
-            <!--Keeping the button away.-->
-
-            <br /><br />
-
-
-            <div id="pdfPreview"></div>
-
-        </div>
-    </form>
-
-    <script src="../static/ap_upload_test.js"></script>
-    <footer>
-        <div class="emailContacts">
-            <div style="text-decoration: underline;">Email</div>
-            <a href="mailto:christopher.dessourc@brooklaw.edu">Work</a>
-            <a href="mailto:chrisdessources@gmail.com">Personal</a>
-        </div>
-        <div class="emailContacts">
-            <div style="text-decoration: underline;">Phone</div>
-            <div>929-539-8015</div>
-        </div>
-    </footer>
 </body>
-
+<script src="../static/accruals_prepaid_code.js"></script>
 </html>

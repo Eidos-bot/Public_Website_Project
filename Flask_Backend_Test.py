@@ -55,7 +55,7 @@ def get_reduri(request_val):
         red_uri_str = "NGROK_REDIRECT_URI"
         print("Using NGROK.")
         return red_uri_str
-    elif request_val.host_url == "http://localhost:5000/":
+    elif request_val.host_url == "http://localhost/" or request_val.host_url == "https://localhost:80":
         red_uri_str = "LOCAL_REDIRECT_URI"
         print("Using Local.")
         return red_uri_str

@@ -123,7 +123,7 @@ OAUTH_SCOPE = ['User.Read']
 
 @app.route('/login/microsoft')
 def login_microsoft():
-    print(request.host_url)
+    print("Attempting to reach microsoft.")
     red_uri = get_reduri(request)
     if isinstance(red_uri, Response):
         return red_uri
@@ -134,12 +134,13 @@ def login_microsoft():
     )
     auth_url, state = oauth.authorization_url(AUTH_BASE_URL, prompt = 'select_account')
     session['oauth_state'] = state
-    print("login state", state)
+    print("Successfully reached Microsoft SSO.")
     return redirect(auth_url)
 
 @app.route('/auth/ms-callback')
 def auth_callback():
-    print(request.host_url)
+    print("Authorizing user...")
+
     red_uri = get_reduri(request)
     if isinstance(red_uri, Response):
         return red_uri
@@ -148,6 +149,7 @@ def auth_callback():
         redirect_uri=os.getenv(red_uri),
         state=session.get('oauth_state')
     )
+    print("Microsoft user authorized.")
 
     print(oauth.state)
 
@@ -267,7 +269,8 @@ def remote_api():
 @login_required
 def download_excel():
     try:
-        if session["user_name"] in admins or personal:
+        if session["user_name"] in admins or session["user_name"] in personal:
+            print(admins,personal)
             print(f"Attempting to download total excel from DB for {session['user_name']}.")
             df = pandas.read_sql('SELECT * FROM accruals', con=engine)
             print("Successfully downloaded total excel from DB.")

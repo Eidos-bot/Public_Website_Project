@@ -39,6 +39,17 @@
             column-gap: 20px;
 
         }
+        .not-ready {
+          color: #666;
+          background: repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 4px,
+            rgba(255, 193, 7, 0.2) 4px,
+            rgba(255, 193, 7, 0.2) 8px
+          );
+          pointer-events: none;
+        }
 
         .nonGLRelatedSection{
             width: fit-content;
@@ -195,7 +206,7 @@
 
    ">Home Screen</a>
 
-    <a href="/voucher-lookup" style="
+    <a class="not-ready" href="/voucher-lookup" style="
      font-weight: bold;
      color: #f8f8f8;
      text-decoration: none;
@@ -203,7 +214,7 @@
      /*margin: 1px 20px;*/
    ">Voucher Lookup</a>
 
-    <a href="/generate-ckse"
+    <a class="not-ready" href="/generate-ckse"
    style="
      font-weight: bold;
      color: #f8f8f8;
@@ -227,10 +238,10 @@
     color: #f8f8f8;
     text-decoration: none;
     font-size: 16px;
-    margin-left:auto;
+    margin-left:200px;
     margin-right:20px;
 ">Download Submissions</a>
-
+    <a href="/logout" style=" margin-left:auto; margin-right:20px; font-weight:bold; color:#f8f8f8; font-size:16px;">Logout</a>
     </div>
 
 
@@ -313,7 +324,7 @@
 
                 <div class="submitter_objs">
 
-                    <div class="child sub"><label>Submitter<input id="submitter" name="Submitter" type="text" required/></label><button type="submit" id="submit_button" >Upload</button></div>
+                    <div class="child sub"><label>Submitter<input id="submitter" name="Submitter" type="text" value="{{ user_name }}" readonly/></label><button type="submit" id="submit_button" >Upload</button></div>
 
     <!--                Remember to add approver section and align it probably-->
 

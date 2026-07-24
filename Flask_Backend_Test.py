@@ -318,6 +318,7 @@ def add_security_headers(response):
                                                         "frame-ancestors 'self';")
     response.headers['Referrer-Policy'] = 'same-origin'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Permissions-Policy'] = 'self'
     return response
 
 @login_manager.user_loader
